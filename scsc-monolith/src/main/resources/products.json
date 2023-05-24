@@ -1,0 +1,51 @@
+[
+  {
+    "id": "be8bf050-c58c-447f-9d8c-cb484f6262ac",
+    "name": "Coffee mug",
+    "desc": "AxonIQ branded wooden coffee mug",
+    "price": 5.55,
+    "image": "mug.png"
+  },
+  {
+    "id": "a1b11124-0917-4435-ac2e-16f0359d9784",
+    "name": "Beanie",
+    "desc": "AxonIQ branded beanie",
+    "price": 12.12,
+    "image": "beanie.png"
+  },
+  {
+    "id": "3114e725-6b6a-412d-88d6-739095d5ad4d",
+    "name": "Beer",
+    "desc": "The best beer under the sun ;)",
+    "price": 3.45,
+    "image": "beer.png"
+  },
+  {
+    "id": "bd78638d-adcf-49c5-8932-aada36446666",
+    "name": "Hoodie",
+    "desc": "Warm hoodie with AxonIQ logo",
+    "price": 21.99,
+    "image": "hoodie.png"
+  },
+  {
+    "id": "544308b7-ecf2-40ce-ab47-74d0be5c92f4",
+    "desc": "A super nice polo shirt",
+    "price": 15.51,
+    "name": "Polo",
+    "image": "polo.png"
+  },
+  {
+    "id": "7c30da66-2fe4-4032-aa2c-d0aa3884f6ab",
+    "name": "Stickers",
+    "desc": "A set of 100 awesome stickers",
+    "price": 10.01,
+    "image": "sticker.png"
+  },
+  {
+    "id": "238d6b47-8039-4718-9c81-6db30294eb18",
+    "name": "Cube",
+    "desc": "The stress cube every developer needs",
+    "price": 8.78,
+    "image": "cube.png"
+  }
+]
