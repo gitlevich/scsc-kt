@@ -1,0 +1,50 @@
+version: "2.4"
+
+services:
+  axonserver:
+    hostname: axonserver
+    user: root
+    container_name: axonserver-scsc
+    restart: always
+    image: axoniq/axonserver:2023.1.1-jdk-17-dev
+    environment:
+      - AXONIQ_LICENSE=/axonserver/config/axoniq.license
+      - LOCAL_AXONSERVER=axonserver
+    ports:
+      - "8024:8024"
+      - "8124:8124"
+      - "8224:8224"
+    volumes:
+      - axoniq_data:/axonserver/data:rw
+    healthcheck:
+      test: curl -f http://localhost:8024/actuator/health || exit 1;
+      interval: 10s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  postgres:
+    hostname: postgres
+    image: postgres:bullseye
+    command: postgres -c 'max_connections=200'
+    container_name: postgres-scsc
+    restart: always
+    # The PGUSER environment variable is required by the healthcheck test.
+    environment:
+      - POSTGRES_DB=scsc
+      - PGUSER=scsc
+      - POSTGRES_USER=scsc
+      - POSTGRES_PASSWORD=scsc
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: "pg_isready"
+      interval: 5s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  axoniq_data:

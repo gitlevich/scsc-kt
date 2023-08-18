@@ -16,7 +16,7 @@
 
         <properties>
             <property name="jakarta.persistence.jdbc.driver" value="org.postgresql.Driver" /> <!-- DB Driver -->
-            <property name="jakarta.persistence.jdbc.url" value="jdbc:postgresql://localhost/SCSC" /> <!-- BD Mane -->
+            <property name="jakarta.persistence.jdbc.url" value="jdbc:postgresql://localhost/scsc" /> <!-- BD Mane -->
             <property name="jakarta.persistence.jdbc.user" value="scsc" /> <!-- DB User -->
             <property name="jakarta.persistence.jdbc.password" value="scsc" /> <!-- DB Password -->
 
