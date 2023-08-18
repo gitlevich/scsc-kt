@@ -1,9 +1,9 @@
 package demo.scsc.commandside.order
 
-import demo.scsc.api.order.CompleteOrderCommand
-import demo.scsc.api.order.OrderCompletedEvent
-import demo.scsc.api.order.OrderCreatedEvent
-import demo.scsc.api.order.OrderCreatedEvent.OrderItem
+import demo.scsc.api.Order.CompleteOrderCommand
+import demo.scsc.api.Order.OrderCompletedEvent
+import demo.scsc.api.Order.OrderCreatedEvent
+import demo.scsc.api.Order.OrderCreatedEvent.OrderItem
 import demo.scsc.infra.EmailService
 import jakarta.mail.MessagingException
 import org.axonframework.commandhandling.CommandHandler
@@ -14,7 +14,6 @@ import org.axonframework.extensions.kotlin.applyEvent
 import org.axonframework.messaging.InterceptorChain
 import org.axonframework.messaging.interceptors.MessageHandlerInterceptor
 import org.axonframework.modelling.command.AggregateIdentifier
-import org.axonframework.modelling.command.AggregateLifecycle
 import org.axonframework.modelling.command.AggregateLifecycle.isLive
 import org.axonframework.modelling.command.AggregateLifecycle.markDeleted
 import org.axonframework.modelling.command.AggregateRoot
@@ -42,9 +41,7 @@ class Order() {
             orderItems.add(OrderItem(itemId, info.name, info.price))
         }
 
-        /* -------------------------
-                notification
-        ------------------------- */AggregateLifecycle.apply(
+        applyEvent(
             OrderCreatedEvent(
                 UUID.randomUUID(),
                 owner,
@@ -55,15 +52,6 @@ class Order() {
 
     @CommandHandler
     fun on(completeOrderCommand: CompleteOrderCommand?) {
-
-        /* -------------------------
-                validation
-        ------------------------- */
-
-
-        /* -------------------------
-                notification
-        ------------------------- */
         applyEvent(OrderCompletedEvent(orderId))
     }
 

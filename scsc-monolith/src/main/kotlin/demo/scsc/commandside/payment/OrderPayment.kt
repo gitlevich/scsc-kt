@@ -1,6 +1,7 @@
 package demo.scsc.commandside.payment
 
-import demo.scsc.api.payment.*
+import demo.scsc.api.Payment
+import demo.scsc.api.Payment.RequestPaymentCommand
 import org.axonframework.commandhandling.CommandExecutionException
 import org.axonframework.commandhandling.CommandHandler
 import org.axonframework.commandhandling.CommandMessage
@@ -10,7 +11,6 @@ import org.axonframework.extensions.kotlin.applyEvent
 import org.axonframework.messaging.InterceptorChain
 import org.axonframework.messaging.interceptors.MessageHandlerInterceptor
 import org.axonframework.modelling.command.AggregateIdentifier
-import org.axonframework.modelling.command.AggregateLifecycle
 import org.axonframework.modelling.command.AggregateLifecycle.*
 import org.slf4j.LoggerFactory
 import java.math.BigDecimal
@@ -30,7 +30,7 @@ class OrderPayment() {
             throw CommandExecutionException("Can't process payments for zero or negative amounts", null)
 
         applyEvent(
-            PaymentRequestedEvent(
+            Payment.PaymentRequestedEvent(
                 requestPaymentCommand.orderPaymentId,
                 requestPaymentCommand.orderId,
                 requestPaymentCommand.amount
@@ -39,32 +39,32 @@ class OrderPayment() {
     }
 
     @CommandHandler
-    fun on(processPaymentCommand: ProcessPaymentCommand) {
+    fun on(processPaymentCommand: Payment.ProcessPaymentCommand) {
         val leftToPay = requestedAmount!!.subtract(paidAmount)
         if (processPaymentCommand.amount.compareTo(leftToPay) > 0) {
             throw CommandExecutionException("Can't pay more than you own", null)
         }
-        applyEvent(PaymentReceivedEvent(orderPaymentId!!, processPaymentCommand.amount))
+        applyEvent(Payment.PaymentReceivedEvent(orderPaymentId!!, processPaymentCommand.amount))
         if (processPaymentCommand.amount.compareTo(leftToPay) == 0) {
 //            apply(new OrderFullyPaidEvent(orderId, orderPaymentId));
-            applyEvent(OrderFullyPaidEvent(orderPaymentId!!, orderId!!))
+            applyEvent(Payment.OrderFullyPaidEvent(orderPaymentId!!, orderId!!))
         }
     }
 
     @EventSourcingHandler
-    fun on(paymentRequestedEvent: PaymentRequestedEvent) {
+    fun on(paymentRequestedEvent: Payment.PaymentRequestedEvent) {
         orderPaymentId = paymentRequestedEvent.orderPaymentId
         orderId = paymentRequestedEvent.orderId
         requestedAmount = paymentRequestedEvent.amount
     }
 
     @EventSourcingHandler
-    fun on(paymentReceivedEvent: PaymentReceivedEvent) {
+    fun on(paymentReceivedEvent: Payment.PaymentReceivedEvent) {
         paidAmount = paidAmount.add(paymentReceivedEvent.amount)
     }
 
     @EventSourcingHandler
-    fun on(orderFullyPaidEvent: OrderFullyPaidEvent?) {
+    fun on(orderFullyPaidEvent: Payment.OrderFullyPaidEvent) {
         markDeleted()
     }
 

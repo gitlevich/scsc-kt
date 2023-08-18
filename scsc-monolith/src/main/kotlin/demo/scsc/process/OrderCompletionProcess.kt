@@ -1,13 +1,13 @@
 package demo.scsc.process
 
-import demo.scsc.api.order.CompleteOrderCommand
-import demo.scsc.api.order.OrderCreatedEvent
-import demo.scsc.api.payment.OrderFullyPaidEvent
-import demo.scsc.api.payment.RequestPaymentCommand
-import demo.scsc.api.warehouse.PackageReadyEvent
-import demo.scsc.api.warehouse.PackageShippedEvent
-import demo.scsc.api.warehouse.RequestShipmentCommand
-import demo.scsc.api.warehouse.ShipPackageCommand
+import demo.scsc.api.Order.CompleteOrderCommand
+import demo.scsc.api.Order.OrderCreatedEvent
+import demo.scsc.api.Payment.OrderFullyPaidEvent
+import demo.scsc.api.Payment.RequestPaymentCommand
+import demo.scsc.api.Warehouse.PackageReadyEvent
+import demo.scsc.api.Warehouse.PackageShippedEvent
+import demo.scsc.api.Warehouse.RequestShipmentCommand
+import demo.scsc.api.Warehouse.ShipPackageCommand
 import org.axonframework.commandhandling.CommandCallback
 import org.axonframework.commandhandling.CommandMessage
 import org.axonframework.commandhandling.CommandResultMessage
@@ -17,7 +17,6 @@ import org.axonframework.messaging.InterceptorChain
 import org.axonframework.messaging.interceptors.MessageHandlerInterceptor
 import org.axonframework.modelling.saga.EndSaga
 import org.axonframework.modelling.saga.SagaEventHandler
-import org.axonframework.modelling.saga.SagaLifecycle
 import org.axonframework.modelling.saga.SagaLifecycle.*
 import org.axonframework.modelling.saga.StartSaga
 import org.slf4j.LoggerFactory

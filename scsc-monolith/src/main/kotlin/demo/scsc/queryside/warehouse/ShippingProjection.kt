@@ -1,10 +1,10 @@
 package demo.scsc.queryside.warehouse
 
 import demo.scsc.Constants
-import demo.scsc.api.warehouse.GetShippingQueryResponse
-import demo.scsc.api.warehouse.GetShippingQueryResponse.ShippingItem
-import demo.scsc.api.warehouse.ProductAddedToPackageEvent
-import demo.scsc.api.warehouse.ShipmentRequestedEvent
+import demo.scsc.api.Warehouse.GetShippingQueryResponse
+import demo.scsc.api.Warehouse.GetShippingQueryResponse.ShippingItem
+import demo.scsc.api.Warehouse.ProductAddedToPackageEvent
+import demo.scsc.api.Warehouse.ShipmentRequestedEvent
 import demo.scsc.config.JpaPersistenceUnit.Companion.forName
 import org.axonframework.config.ProcessingGroup
 import org.axonframework.eventhandling.EventHandler

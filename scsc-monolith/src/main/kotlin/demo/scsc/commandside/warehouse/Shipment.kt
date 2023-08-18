@@ -1,6 +1,10 @@
 package demo.scsc.commandside.warehouse
 
-import demo.scsc.api.warehouse.*
+import demo.scsc.api.Warehouse.PackageShippedEvent
+import demo.scsc.api.Warehouse.RequestShipmentCommand
+import demo.scsc.api.Warehouse.ShipPackageCommand
+import demo.scsc.api.Warehouse.ShipmentImpossible
+import demo.scsc.api.Warehouse.ShipmentRequestedEvent
 import org.axonframework.commandhandling.CommandExecutionException
 import org.axonframework.commandhandling.CommandHandler
 import org.axonframework.commandhandling.CommandMessage
@@ -11,8 +15,8 @@ import org.axonframework.messaging.InterceptorChain
 import org.axonframework.messaging.MetaData
 import org.axonframework.messaging.interceptors.MessageHandlerInterceptor
 import org.axonframework.modelling.command.AggregateIdentifier
-import org.axonframework.modelling.command.AggregateLifecycle
-import org.axonframework.modelling.command.AggregateLifecycle.*
+import org.axonframework.modelling.command.AggregateLifecycle.isLive
+import org.axonframework.modelling.command.AggregateLifecycle.markDeleted
 import org.axonframework.modelling.command.AggregateMember
 import org.axonframework.modelling.command.AggregateRoot
 import org.slf4j.LoggerFactory
@@ -40,7 +44,7 @@ class Shipment() {
     }
 
     @CommandHandler
-    fun on(shipPackageCommand: ShipPackageCommand?) {
+    fun on(shipPackageCommand: ShipPackageCommand) {
         if (!packageContent!!.ready())
             throw CommandExecutionException("Package not ready", null, ShipmentImpossible.NOT_READY)
         applyEvent(PackageShippedEvent(shipmentId))
@@ -53,7 +57,7 @@ class Shipment() {
     }
 
     @EventSourcingHandler
-    fun on(packageShippedEvent: PackageShippedEvent?) {
+    fun on(packageShippedEvent: PackageShippedEvent) {
         if (isLive()) {
             /*
                 We end this demo here!

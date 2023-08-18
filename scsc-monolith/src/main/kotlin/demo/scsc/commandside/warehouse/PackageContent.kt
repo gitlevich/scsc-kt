@@ -1,8 +1,8 @@
 package demo.scsc.commandside.warehouse
 
-import demo.scsc.api.warehouse.AddProductToPackageCommand
-import demo.scsc.api.warehouse.PackageReadyEvent
-import demo.scsc.api.warehouse.ProductAddedToPackageEvent
+import demo.scsc.api.Warehouse.AddProductToPackageCommand
+import demo.scsc.api.Warehouse.PackageReadyEvent
+import demo.scsc.api.Warehouse.ProductAddedToPackageEvent
 import org.axonframework.commandhandling.CommandExecutionException
 import org.axonframework.commandhandling.CommandHandler
 import org.axonframework.commandhandling.CommandMessage
@@ -14,7 +14,6 @@ import org.axonframework.messaging.interceptors.MessageHandlerInterceptor
 import org.axonframework.modelling.command.AggregateLifecycle
 import org.slf4j.LoggerFactory
 import java.util.*
-import java.util.function.Function
 import java.util.stream.Collectors
 
 class PackageContent(private val orderId: UUID, items: List<UUID>) {
