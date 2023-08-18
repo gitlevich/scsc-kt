@@ -12,7 +12,7 @@
         <class>demo.scsc.queryside.order.OrderEntityItem</class>
         <class>demo.scsc.queryside.warehouse.ShippingEntity</class>
         <class>demo.scsc.queryside.warehouse.ShippingEntityItem</class>
-        <class>demo.scsc.commandside.order.ProductValidationEntity</class>
+        <class>demo.scsc.commandside.order.Product</class>
 
         <properties>
             <property name="jakarta.persistence.jdbc.driver" value="org.postgresql.Driver" /> <!-- DB Driver -->

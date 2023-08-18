@@ -8,8 +8,8 @@ import java.math.BigDecimal
 import java.util.*
 
 @Entity
-@Table(name = "product_validation")
-class ProductValidationEntity {
+@Table(name = "product")
+class Product {
     @Id
     @Column(name = "id", nullable = false)
     lateinit var id: UUID

@@ -13,42 +13,29 @@ class ProductValidation {
 
     @EventHandler
     fun on(productUpdateReceivedEvent: productCatalog.ProductUpdateReceivedEvent) {
-        val em = forName("SCSC")!!.newEntityManager
+        val em = jpaPersistenceUnit().newEntityManager
         em.transaction.begin()
         em.merge(toEntity(productUpdateReceivedEvent))
         em.transaction.commit()
     }
 
-    fun forProduct(id: UUID): ProductValidationInfo? {
-        var productValidationInfo: ProductValidationInfo? = null
-        val em = forName("SCSC")!!.newEntityManager
-        val productValidationEntity = em.find(
-            ProductValidationEntity::class.java, id
-        )
-        if (productValidationEntity != null) {
-            productValidationInfo = ProductValidationInfo(productValidationEntity)
-        }
-        return productValidationInfo
+    fun forProduct(id: UUID): ProductValidationInfo? = jpaPersistenceUnit()
+        .newEntityManager
+        .find(Product::class.java, id)
+        ?.let { product -> ProductValidationInfo(product) }
+
+    private fun toEntity(event: productCatalog.ProductUpdateReceivedEvent) = Product().apply {
+        id = event.id
+        name = event.name
+        price = event.price
+        isOnSale = event.onSale
     }
 
-    private fun toEntity(event: productCatalog.ProductUpdateReceivedEvent): ProductValidationEntity {
-        val productValidationEntity = ProductValidationEntity()
-        productValidationEntity.id = event.id
-        productValidationEntity.name = event.name
-        productValidationEntity.price = event.price
-        productValidationEntity.isOnSale = event.onSale
-        return productValidationEntity
-    }
+    private fun jpaPersistenceUnit() = forName("SCSC")!!
 
-    class ProductValidationInfo(productValidationEntity: ProductValidationEntity) {
-        val name: String
-        val price: BigDecimal
-        val forSale: Boolean
-
-        init {
-            name = productValidationEntity.name
-            price = productValidationEntity.price
-            forSale = productValidationEntity.isOnSale
-        }
+    class ProductValidationInfo(product: Product) {
+        val name: String = product.name
+        val price: BigDecimal = product.price
+        val forSale: Boolean = product.isOnSale
     }
 }
