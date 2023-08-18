@@ -31,13 +31,13 @@ class ProductValidation {
         return productValidationInfo
     }
 
-    private fun toEntity(event: productCatalog.ProductUpdateReceivedEvent) = with(event) {
-        ProductValidationEntity(
-            id = id,
-            name = name,
-            price = price,
-            isOnSale = onSale
-        )
+    private fun toEntity(event: productCatalog.ProductUpdateReceivedEvent): ProductValidationEntity {
+        val productValidationEntity = ProductValidationEntity()
+        productValidationEntity.id = event.id
+        productValidationEntity.name = event.name
+        productValidationEntity.price = event.price
+        productValidationEntity.isOnSale = event.onSale
+        return productValidationEntity
     }
 
     class ProductValidationInfo(productValidationEntity: ProductValidationEntity) {
