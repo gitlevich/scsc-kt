@@ -3,7 +3,7 @@ package demo.scsc.api
 import org.axonframework.modelling.command.TargetAggregateIdentifier
 import java.util.*
 
-object ShoppingCart {
+object shoppingCart {
     data class AbandonCartCommand(@TargetAggregateIdentifier val cartId: UUID)
     data class AddProductToCartCommand(
         @TargetAggregateIdentifier val cartId: UUID,

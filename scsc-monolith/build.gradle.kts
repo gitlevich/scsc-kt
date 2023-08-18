@@ -13,6 +13,8 @@ val axonVersion = "4.7.4"
 val inspectorAxonVersion = "0.1.5"
 val jacksonVersion = "2.15.1"
 val kotlinVersion = "1.9.0"
+val mockkVersion = "1.13.5"
+val assertjVersion = "3.24.2"
 
 dependencies {
     // Dependency Management
@@ -23,6 +25,7 @@ dependencies {
     implementation("org.axonframework:axon-configuration")
     implementation("org.axonframework:axon-server-connector")
     implementation("io.axoniq.inspector:inspector-axon:$inspectorAxonVersion")
+
     implementation("org.axonframework.extensions.kotlin:axon-kotlin:4.8.0")
 
     // Jackson serialization
@@ -49,7 +52,9 @@ dependencies {
     // ArchUnit
     implementation("com.tngtech.archunit:archunit-junit5:1.0.1")
     implementation("org.junit.jupiter:junit-jupiter:5.9.3")
-    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion")
     implementation("org.jetbrains.kotlin:kotlin-test:$kotlinVersion")
     testImplementation("org.axonframework.extensions.kotlin:axon-kotlin:4.8.0")
+    testImplementation("io.mockk:mockk:$mockkVersion")
+    testImplementation("org.assertj:assertj-core:$assertjVersion")
+    testImplementation("org.axonframework:axon-test:$axonVersion")
 }

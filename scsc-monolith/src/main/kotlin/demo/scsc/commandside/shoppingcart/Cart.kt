@@ -1,6 +1,6 @@
 package demo.scsc.commandside.shoppingcart
 
-import demo.scsc.api.ShoppingCart
+import demo.scsc.api.shoppingCart
 import demo.scsc.commandside.order.Order
 import org.axonframework.commandhandling.CommandExecutionException
 import org.axonframework.commandhandling.CommandHandler
@@ -26,37 +26,37 @@ class Cart() {
     @AggregateIdentifier
     var id: UUID? = null
     private var owner: String? = null
-    private val products: MutableSet<UUID> = HashSet()
+    private val products: MutableSet<UUID> = mutableSetOf()
 
     @CommandHandler
     @CreationPolicy(AggregateCreationPolicy.CREATE_IF_MISSING)
-    fun handle(command: ShoppingCart.AddProductToCartCommand, deadlineManager: DeadlineManager): UUID {
+    fun handle(command: shoppingCart.AddProductToCartCommand, deadlineManager: DeadlineManager): UUID {
 
-        if (id == null) applyEvent(ShoppingCart.CartCreatedEvent(UUID.randomUUID(), command.owner))
+        if (id == null) applyEvent(shoppingCart.CartCreatedEvent(UUID.randomUUID(), command.owner))
         if (products.contains(command.productId))
             throw CommandExecutionException("Product already in the cart! ", null)
 
-                applyEvent(ShoppingCart.ProductAddedToCartEvent(id!!, command.productId))
+        applyEvent(shoppingCart.ProductAddedToCartEvent(id!!, command.productId))
         deadlineManager.schedule(Duration.ofMinutes(10), ABANDON_CART)
         return id!!
     }
 
     @CommandHandler
-    fun handle(command: ShoppingCart.RemoveProductFromCartCommand) {
+    fun handle(command: shoppingCart.RemoveProductFromCartCommand) {
 
         if (!products.contains(command.productId)) throw CommandExecutionException("Product not in the cart! ", null)
 
-        applyEvent(ShoppingCart.ProductRemovedFromCartEvent(id!!, command.productId))
+        applyEvent(shoppingCart.ProductRemovedFromCartEvent(id!!, command.productId))
     }
 
     @CommandHandler
-    fun handle(command: ShoppingCart.AbandonCartCommand) {
+    fun handle(command: shoppingCart.AbandonCartCommand) {
 
-        applyEvent(ShoppingCart.CartAbandonedEvent(command.cartId, ShoppingCart.CartAbandonedEvent.Reason.MANUAL))
+        applyEvent(shoppingCart.CartAbandonedEvent(command.cartId, shoppingCart.CartAbandonedEvent.Reason.MANUAL))
     }
 
     @CommandHandler
-    fun handle(command: ShoppingCart.CheckOutCartCommand) {
+    fun handle(command: shoppingCart.CheckOutCartCommand) {
 
         try {
             createNew(Order::class.java) { Order(products.stream().toList(), owner!!) }
@@ -64,44 +64,41 @@ class Cart() {
             e.printStackTrace()
             throw CommandExecutionException(e.message, e)
         }
-        applyEvent(ShoppingCart.CartCheckedOutEvent(command.cartId))
+        applyEvent(shoppingCart.CartCheckedOutEvent(command.cartId))
     }
 
     @DeadlineHandler(deadlineName = ABANDON_CART)
     fun onDeadline() {
-        applyEvent(ShoppingCart.CartAbandonedEvent(id!!, ShoppingCart.CartAbandonedEvent.Reason.TIMEOUT))
+        applyEvent(shoppingCart.CartAbandonedEvent(id!!, shoppingCart.CartAbandonedEvent.Reason.TIMEOUT))
     }
 
     @EventSourcingHandler
-    fun on(cartCreatedEvent: ShoppingCart.CartCreatedEvent) {
+    fun on(cartCreatedEvent: shoppingCart.CartCreatedEvent) {
         id = cartCreatedEvent.id
         owner = cartCreatedEvent.owner
     }
 
     @EventSourcingHandler
-    fun on(productAddedToCartEvent: ShoppingCart.ProductAddedToCartEvent) {
+    fun on(productAddedToCartEvent: shoppingCart.ProductAddedToCartEvent) {
         products.add(productAddedToCartEvent.productId)
     }
 
     @EventSourcingHandler
-    fun on(productRemovedFromCartEvent: ShoppingCart.ProductRemovedFromCartEvent) {
+    fun on(productRemovedFromCartEvent: shoppingCart.ProductRemovedFromCartEvent) {
         products.remove(productRemovedFromCartEvent.productId)
     }
 
     @EventSourcingHandler
-    fun on(cartAbandonedEvent: ShoppingCart.CartAbandonedEvent) {
+    fun on(cartAbandonedEvent: shoppingCart.CartAbandonedEvent) {
         markDeleted()
     }
 
     @EventSourcingHandler
-    fun on(cartCheckedOutEvent: ShoppingCart.CartCheckedOutEvent) {
+    fun on(cartCheckedOutEvent: shoppingCart.CartCheckedOutEvent) {
         markDeleted()
     }
 
     @MessageHandlerInterceptor(messageType = CommandMessage::class)
-    @Throws(
-        Exception::class
-    )
     fun intercept(
         message: CommandMessage<*>,
         interceptorChain: InterceptorChain
@@ -111,7 +108,6 @@ class Cart() {
     }
 
     @MessageHandlerInterceptor(messageType = EventMessage::class)
-    @Throws(Exception::class)
     fun intercept(
         message: EventMessage<*>,
         interceptorChain: InterceptorChain

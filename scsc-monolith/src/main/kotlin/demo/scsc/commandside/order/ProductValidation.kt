@@ -18,7 +18,7 @@ class ProductValidation {
         em.transaction.commit()
     }
 
-    fun forProduct(id: UUID?): ProductValidationInfo? {
+    fun forProduct(id: UUID): ProductValidationInfo? {
         var productValidationInfo: ProductValidationInfo? = null
         val em = forName("SCSC")!!.newEntityManager
         val productValidationEntity = em.find(
@@ -42,12 +42,12 @@ class ProductValidation {
     class ProductValidationInfo(productValidationEntity: ProductValidationEntity) {
         val name: String
         val price: BigDecimal
-        val onSale: Boolean
+        val forSale: Boolean
 
         init {
             name = productValidationEntity.name
             price = productValidationEntity.price
-            onSale = productValidationEntity.isOnSale
+            forSale = productValidationEntity.isOnSale
         }
     }
 }

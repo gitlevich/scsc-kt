@@ -1,9 +1,9 @@
 package demo.scsc.commandside.order
 
-import demo.scsc.api.Order.CompleteOrderCommand
-import demo.scsc.api.Order.OrderCompletedEvent
-import demo.scsc.api.Order.OrderCreatedEvent
-import demo.scsc.api.Order.OrderCreatedEvent.OrderItem
+import demo.scsc.api.order.CompleteOrderCommand
+import demo.scsc.api.order.OrderCompletedEvent
+import demo.scsc.api.order.OrderCreatedEvent
+import demo.scsc.api.order.OrderCreatedEvent.OrderItem
 import demo.scsc.infra.EmailService
 import jakarta.mail.MessagingException
 import org.axonframework.commandhandling.CommandHandler
@@ -25,33 +25,29 @@ class Order() {
     @AggregateIdentifier
     private lateinit var orderId: UUID
     private lateinit var owner: String
-    private val items: MutableList<OrderItem> = mutableListOf()
+    internal val items: MutableList<OrderItem> = mutableListOf()
 
     constructor(itemIds: List<UUID>, owner: String): this() {
-
-        /* -------------------------
-                validation
-        ------------------------- */
         val orderItems: MutableList<OrderItem> = LinkedList()
         val productValidation = ProductValidation()
         for (itemId in itemIds) {
             val info = productValidation.forProduct(itemId)
                 ?: throw IllegalStateException("No product validation available")
-            check(info.onSale) { "Product " + info.name + " is no longer on sale" }
+            check(info.forSale) { "Product " + info.name + " is no longer on sale" }
             orderItems.add(OrderItem(itemId, info.name, info.price))
         }
 
         applyEvent(
             OrderCreatedEvent(
-                UUID.randomUUID(),
-                owner,
-                orderItems
+                orderId = UUID.randomUUID(),
+                owner = owner,
+                items = orderItems
             )
         )
     }
 
     @CommandHandler
-    fun on(completeOrderCommand: CompleteOrderCommand?) {
+    fun on(completeOrderCommand: CompleteOrderCommand) {
         applyEvent(OrderCompletedEvent(orderId))
     }
 
@@ -60,47 +56,31 @@ class Order() {
         orderId = orderCreatedEvent.orderId
         owner = orderCreatedEvent.owner
         items.addAll(orderCreatedEvent.items)
-        if (isLive()) {
-            try {
-                EmailService.sendEmail(
-                    owner,
-                    "New order $orderId",
-                    "Thank you for your order!\n\n$items"
-                )
-            } catch (e: MessagingException) {
-                e.printStackTrace()
-            }
+        if (isLive()) try {
+            EmailService.sendEmail(
+                owner,
+                "New order $orderId",
+                "Thank you for your order!\n\n$items"
+            )
+        } catch (e: MessagingException) {
+            e.printStackTrace()
         }
     }
 
     @EventSourcingHandler
-    fun on(orderCompletedEvent: OrderCompletedEvent?) {
+    fun on(orderCompletedEvent: OrderCompletedEvent) {
         markDeleted()
     }
 
     @MessageHandlerInterceptor(messageType = CommandMessage::class)
-    @Throws(
-        Exception::class
-    )
-    fun intercept(
-        message: CommandMessage<*>,
-        interceptorChain: InterceptorChain
-    ) {
-        LOG.info("[  COMMAND ] " + message.payload.toString())
+    fun intercept(message: CommandMessage<*>, interceptorChain: InterceptorChain) {
+        LOG.info("[  COMMAND ] ${message.payload}")
         interceptorChain.proceed()
     }
 
     @MessageHandlerInterceptor(messageType = EventMessage::class)
-    @Throws(Exception::class)
-    fun intercept(
-        message: EventMessage<*>,
-        interceptorChain: InterceptorChain
-    ) {
-        if (isLive()) {
-            LOG.info("[    EVENT ] " + message.payload.toString())
-        } else {
-            LOG.info("[ SOURCING ] " + message.payload.toString())
-        }
+    fun intercept(message: EventMessage<*>, interceptorChain: InterceptorChain) {
+        if (isLive()) LOG.info("[    EVENT ] ${message.payload}") else LOG.info("[ SOURCING ] ${message.payload}")
         interceptorChain.proceed()
     }
 

@@ -4,7 +4,7 @@ import org.axonframework.modelling.command.TargetAggregateIdentifier
 import java.math.BigDecimal
 import java.util.*
 
-object Order {
+object order {
     data class CompleteOrderCommand(@TargetAggregateIdentifier val orderId: UUID)
     data class GetOrdersQuery(val owner: String, val orderId: String)
     data class GetOrdersQueryResponse(val orders: List<Order>) {

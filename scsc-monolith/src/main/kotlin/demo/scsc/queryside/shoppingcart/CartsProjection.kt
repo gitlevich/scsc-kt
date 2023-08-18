@@ -1,7 +1,7 @@
 package demo.scsc.queryside.shoppingcart
 
 import demo.scsc.Constants
-import demo.scsc.api.ShoppingCart
+import demo.scsc.api.shoppingCart
 import org.axonframework.config.ProcessingGroup
 import org.axonframework.eventhandling.EventHandler
 import org.axonframework.eventhandling.EventMessage
@@ -15,13 +15,13 @@ import java.util.*
 @ProcessingGroup(Constants.PROCESSING_GROUP_CART)
 class CartsProjection {
     @EventHandler
-    fun on(cartCreatedEvent: ShoppingCart.CartCreatedEvent) {
+    fun on(cartCreatedEvent: shoppingCart.CartCreatedEvent) {
         val cartStore = CartStore()
         cartStore.saveCart(cartCreatedEvent.owner, cartCreatedEvent.id)
     }
 
     @EventHandler
-    fun on(productAddedToCartEvent: ShoppingCart.ProductAddedToCartEvent) {
+    fun on(productAddedToCartEvent: shoppingCart.ProductAddedToCartEvent) {
         val cartStore = CartStore()
         cartStore.saveProduct(
             productAddedToCartEvent.cartId,
@@ -30,25 +30,25 @@ class CartsProjection {
     }
 
     @EventHandler
-    fun on(productRemovedFromCartEvent: ShoppingCart.ProductRemovedFromCartEvent) {
+    fun on(productRemovedFromCartEvent: shoppingCart.ProductRemovedFromCartEvent) {
         val cartStore = CartStore()
         cartStore.removeProduct(productRemovedFromCartEvent.cartId, productRemovedFromCartEvent.productId)
     }
 
     @EventHandler
-    fun on(cartAbandonedEvent: ShoppingCart.CartAbandonedEvent) {
+    fun on(cartAbandonedEvent: shoppingCart.CartAbandonedEvent) {
         val cartStore = CartStore()
         cartStore.removeCart(cartAbandonedEvent.cartId)
     }
 
     @EventHandler
-    fun on(cartCheckedOutEvent: ShoppingCart.CartCheckedOutEvent) {
+    fun on(cartCheckedOutEvent: shoppingCart.CartCheckedOutEvent) {
         val cartStore = CartStore()
         cartStore.removeCart(cartCheckedOutEvent.cartId)
     }
 
     @QueryHandler
-    fun on(getCartQuery: ShoppingCart.GetCartQuery): Optional<ShoppingCart.GetCartQueryResponse> {
+    fun on(getCartQuery: shoppingCart.GetCartQuery): Optional<shoppingCart.GetCartQueryResponse> {
         val cartStore = CartStore()
         val getCartQueryResponse = cartStore.getOwnersCarts(getCartQuery.owner)
         return Optional.ofNullable(getCartQueryResponse)
