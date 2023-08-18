@@ -1,5 +1,9 @@
 plugins {
-    kotlin("jvm") version "1.9.0"
+    val kotlinGradlePluginVersion = "1.9.0"
+    kotlin("jvm") version kotlinGradlePluginVersion
+    kotlin("plugin.noarg") version kotlinGradlePluginVersion
+    kotlin("plugin.allopen") version kotlinGradlePluginVersion
+    id("org.jetbrains.kotlin.plugin.jpa") version kotlinGradlePluginVersion
 }
 
 group = "io.axoniq.demo.scsc"
@@ -7,6 +11,7 @@ version = "0.0.1-SNAPSHOT"
 
 repositories {
     mavenCentral()
+    maven { url = uri("https://plugins.gradle.org/m2/") }
 }
 
 val axonVersion = "4.7.4"
@@ -37,6 +42,7 @@ dependencies {
     implementation("jakarta.persistence:jakarta.persistence-api:3.1.0")
     implementation("org.hibernate:hibernate-core:6.2.2.Final")
     implementation("org.postgresql:postgresql:42.6.0")
+    implementation("org.jetbrains.kotlin.plugin.jpa:org.jetbrains.kotlin.plugin.jpa.gradle.plugin:1.9.0")
 
     // Microstream
     implementation("one.microstream:microstream-storage-embedded:08.00.00-MS-GA")

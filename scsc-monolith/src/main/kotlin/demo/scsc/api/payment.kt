@@ -4,7 +4,7 @@ import org.axonframework.modelling.command.TargetAggregateIdentifier
 import java.math.BigDecimal
 import java.util.*
 
-object Payment {
+object payment {
     data class GetPaymentForOrderQuery(val orderId: UUID)
     data class GetPaymentForOrderQueryResponse(
         val id: UUID,

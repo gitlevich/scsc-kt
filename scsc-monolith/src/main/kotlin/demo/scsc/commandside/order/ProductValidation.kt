@@ -10,6 +10,7 @@ import java.util.*
 
 @ProcessingGroup(Constants.PROCESSING_GROUP_PRODUCT)
 class ProductValidation {
+
     @EventHandler
     fun on(productUpdateReceivedEvent: productCatalog.ProductUpdateReceivedEvent) {
         val em = forName("SCSC")!!.newEntityManager
@@ -30,13 +31,13 @@ class ProductValidation {
         return productValidationInfo
     }
 
-    private fun toEntity(productUpdateReceivedEvent: productCatalog.ProductUpdateReceivedEvent): ProductValidationEntity {
-        val productValidationEntity = ProductValidationEntity()
-        productValidationEntity.id = productUpdateReceivedEvent.id
-        productValidationEntity.name = productUpdateReceivedEvent.name
-        productValidationEntity.price = productUpdateReceivedEvent.price
-        productValidationEntity.isOnSale = productUpdateReceivedEvent.onSale
-        return productValidationEntity
+    private fun toEntity(event: productCatalog.ProductUpdateReceivedEvent) = with(event) {
+        ProductValidationEntity(
+            id = id,
+            name = name,
+            price = price,
+            isOnSale = onSale
+        )
     }
 
     class ProductValidationInfo(productValidationEntity: ProductValidationEntity) {

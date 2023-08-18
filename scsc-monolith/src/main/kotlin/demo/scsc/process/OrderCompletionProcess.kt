@@ -2,8 +2,8 @@ package demo.scsc.process
 
 import demo.scsc.api.order.CompleteOrderCommand
 import demo.scsc.api.order.OrderCreatedEvent
-import demo.scsc.api.Payment.OrderFullyPaidEvent
-import demo.scsc.api.Payment.RequestPaymentCommand
+import demo.scsc.api.payment.OrderFullyPaidEvent
+import demo.scsc.api.payment.RequestPaymentCommand
 import demo.scsc.api.warehouse.PackageReadyEvent
 import demo.scsc.api.warehouse.PackageShippedEvent
 import demo.scsc.api.warehouse.RequestShipmentCommand

@@ -1,9 +1,9 @@
 package demo.scsc.queryside.payment
 
-import demo.scsc.api.Payment.GetPaymentForOrderQuery
-import demo.scsc.api.Payment.GetPaymentForOrderQueryResponse
-import demo.scsc.api.Payment.PaymentReceivedEvent
-import demo.scsc.api.Payment.PaymentRequestedEvent
+import demo.scsc.api.payment.GetPaymentForOrderQuery
+import demo.scsc.api.payment.GetPaymentForOrderQueryResponse
+import demo.scsc.api.payment.PaymentReceivedEvent
+import demo.scsc.api.payment.PaymentRequestedEvent
 import demo.scsc.config.JpaPersistenceUnit.Companion.forName
 import jakarta.persistence.NoResultException
 import org.axonframework.config.ProcessingGroup

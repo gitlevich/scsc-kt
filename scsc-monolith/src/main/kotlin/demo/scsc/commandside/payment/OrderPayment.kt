@@ -1,7 +1,7 @@
 package demo.scsc.commandside.payment
 
-import demo.scsc.api.Payment
-import demo.scsc.api.Payment.RequestPaymentCommand
+import demo.scsc.api.payment
+import demo.scsc.api.payment.RequestPaymentCommand
 import org.axonframework.commandhandling.CommandExecutionException
 import org.axonframework.commandhandling.CommandHandler
 import org.axonframework.commandhandling.CommandMessage
@@ -24,13 +24,13 @@ class OrderPayment() {
     private var paidAmount = BigDecimal.ZERO
 
     @CommandHandler
-    constructor(requestPaymentCommand: RequestPaymentCommand): this() {
+    constructor(requestPaymentCommand: RequestPaymentCommand) : this() {
 
         if (requestPaymentCommand.amount <= BigDecimal.ZERO)
             throw CommandExecutionException("Can't process payments for zero or negative amounts", null)
 
         applyEvent(
-            Payment.PaymentRequestedEvent(
+            payment.PaymentRequestedEvent(
                 requestPaymentCommand.orderPaymentId,
                 requestPaymentCommand.orderId,
                 requestPaymentCommand.amount
@@ -39,58 +39,50 @@ class OrderPayment() {
     }
 
     @CommandHandler
-    fun on(processPaymentCommand: Payment.ProcessPaymentCommand) {
+    fun on(processPaymentCommand: payment.ProcessPaymentCommand) {
         val leftToPay = requestedAmount!!.subtract(paidAmount)
         if (processPaymentCommand.amount.compareTo(leftToPay) > 0) {
             throw CommandExecutionException("Can't pay more than you own", null)
         }
-        applyEvent(Payment.PaymentReceivedEvent(orderPaymentId!!, processPaymentCommand.amount))
+        applyEvent(payment.PaymentReceivedEvent(orderPaymentId!!, processPaymentCommand.amount))
         if (processPaymentCommand.amount.compareTo(leftToPay) == 0) {
 //            apply(new OrderFullyPaidEvent(orderId, orderPaymentId));
-            applyEvent(Payment.OrderFullyPaidEvent(orderPaymentId!!, orderId!!))
+            applyEvent(payment.OrderFullyPaidEvent(orderPaymentId!!, orderId!!))
         }
     }
 
     @EventSourcingHandler
-    fun on(paymentRequestedEvent: Payment.PaymentRequestedEvent) {
+    fun on(paymentRequestedEvent: payment.PaymentRequestedEvent) {
         orderPaymentId = paymentRequestedEvent.orderPaymentId
         orderId = paymentRequestedEvent.orderId
         requestedAmount = paymentRequestedEvent.amount
     }
 
     @EventSourcingHandler
-    fun on(paymentReceivedEvent: Payment.PaymentReceivedEvent) {
+    fun on(paymentReceivedEvent: payment.PaymentReceivedEvent) {
         paidAmount = paidAmount.add(paymentReceivedEvent.amount)
     }
 
     @EventSourcingHandler
-    fun on(orderFullyPaidEvent: Payment.OrderFullyPaidEvent) {
+    fun on(orderFullyPaidEvent: payment.OrderFullyPaidEvent) {
         markDeleted()
     }
 
     @MessageHandlerInterceptor(messageType = CommandMessage::class)
-    @Throws(
-        Exception::class
-    )
     fun intercept(
         message: CommandMessage<*>,
         interceptorChain: InterceptorChain
     ) {
-        LOG.info("[  COMMAND ] " + message.payload.toString())
+        LOG.info("[  COMMAND ] ${message.payload}")
         interceptorChain.proceed()
     }
 
     @MessageHandlerInterceptor(messageType = EventMessage::class)
-    @Throws(Exception::class)
     fun intercept(
         message: EventMessage<*>,
         interceptorChain: InterceptorChain
     ) {
-        if (isLive()) {
-            LOG.info("[    EVENT ] " + message.payload.toString())
-        } else {
-            LOG.info("[ SOURCING ] " + message.payload.toString())
-        }
+        if (isLive()) LOG.info("[    EVENT ] ${message.payload}") else LOG.info("[ SOURCING ] ${message.payload}")
         interceptorChain.proceed()
     }
 
