@@ -1,10 +1,10 @@
 package demo.scsc.commandside.warehouse
 
-import demo.scsc.api.Warehouse.PackageShippedEvent
-import demo.scsc.api.Warehouse.RequestShipmentCommand
-import demo.scsc.api.Warehouse.ShipPackageCommand
-import demo.scsc.api.Warehouse.ShipmentImpossible
-import demo.scsc.api.Warehouse.ShipmentRequestedEvent
+import demo.scsc.api.warehouse.PackageShippedEvent
+import demo.scsc.api.warehouse.RequestShipmentCommand
+import demo.scsc.api.warehouse.ShipPackageCommand
+import demo.scsc.api.warehouse.ShipmentImpossible
+import demo.scsc.api.warehouse.ShipmentRequestedEvent
 import org.axonframework.commandhandling.CommandExecutionException
 import org.axonframework.commandhandling.CommandHandler
 import org.axonframework.commandhandling.CommandMessage

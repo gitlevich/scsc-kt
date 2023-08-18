@@ -7,7 +7,7 @@ import demo.scsc.api.order.GetOrdersQueryResponse.OrderLine
 import demo.scsc.api.order.OrderCompletedEvent
 import demo.scsc.api.order.OrderCreatedEvent
 import demo.scsc.api.Payment.OrderFullyPaidEvent
-import demo.scsc.api.Warehouse.PackageReadyEvent
+import demo.scsc.api.warehouse.PackageReadyEvent
 import demo.scsc.config.JpaPersistenceUnit.Companion.forName
 import org.axonframework.config.ProcessingGroup
 import org.axonframework.eventhandling.EventHandler

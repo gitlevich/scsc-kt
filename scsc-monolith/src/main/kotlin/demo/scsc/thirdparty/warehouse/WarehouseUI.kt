@@ -1,8 +1,8 @@
 package demo.scsc.thirdparty.warehouse
 
-import demo.scsc.api.Warehouse.AddProductToPackageCommand
-import demo.scsc.api.Warehouse.GetShippingQueryResponse
-import demo.scsc.api.Warehouse.GetShippingQueryResponse.ShippingItem
+import demo.scsc.api.warehouse.AddProductToPackageCommand
+import demo.scsc.api.warehouse.GetShippingQueryResponse
+import demo.scsc.api.warehouse.GetShippingQueryResponse.ShippingItem
 import org.axonframework.commandhandling.CommandMessage
 import org.axonframework.commandhandling.CommandResultMessage
 import org.axonframework.config.Configuration

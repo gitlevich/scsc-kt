@@ -1,10 +1,10 @@
 package demo.scsc.queryside.productcatalog
 
 import demo.scsc.Constants
-import demo.scsc.api.ProductCatalog.ProductListQuery
-import demo.scsc.api.ProductCatalog.ProductListQueryResponse
-import demo.scsc.api.ProductCatalog.ProductListQueryResponse.ProductInfo
-import demo.scsc.api.ProductCatalog.ProductUpdateReceivedEvent
+import demo.scsc.api.productCatalog.ProductListQuery
+import demo.scsc.api.productCatalog.ProductListQueryResponse
+import demo.scsc.api.productCatalog.ProductListQueryResponse.ProductInfo
+import demo.scsc.api.productCatalog.ProductUpdateReceivedEvent
 import demo.scsc.config.JpaPersistenceUnit.Companion.forName
 import org.axonframework.config.ProcessingGroup
 import org.axonframework.eventhandling.EventHandler

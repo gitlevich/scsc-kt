@@ -1,7 +1,7 @@
 package demo.scsc.commandside.order
 
 import demo.scsc.Constants
-import demo.scsc.api.ProductCatalog
+import demo.scsc.api.productCatalog
 import demo.scsc.config.JpaPersistenceUnit.Companion.forName
 import org.axonframework.config.ProcessingGroup
 import org.axonframework.eventhandling.EventHandler
@@ -11,7 +11,7 @@ import java.util.*
 @ProcessingGroup(Constants.PROCESSING_GROUP_PRODUCT)
 class ProductValidation {
     @EventHandler
-    fun on(productUpdateReceivedEvent: ProductCatalog.ProductUpdateReceivedEvent) {
+    fun on(productUpdateReceivedEvent: productCatalog.ProductUpdateReceivedEvent) {
         val em = forName("SCSC")!!.newEntityManager
         em.transaction.begin()
         em.merge(toEntity(productUpdateReceivedEvent))
@@ -30,7 +30,7 @@ class ProductValidation {
         return productValidationInfo
     }
 
-    private fun toEntity(productUpdateReceivedEvent: ProductCatalog.ProductUpdateReceivedEvent): ProductValidationEntity {
+    private fun toEntity(productUpdateReceivedEvent: productCatalog.ProductUpdateReceivedEvent): ProductValidationEntity {
         val productValidationEntity = ProductValidationEntity()
         productValidationEntity.id = productUpdateReceivedEvent.id
         productValidationEntity.name = productUpdateReceivedEvent.name

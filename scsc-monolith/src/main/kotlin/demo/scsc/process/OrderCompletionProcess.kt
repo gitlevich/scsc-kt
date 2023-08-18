@@ -4,10 +4,10 @@ import demo.scsc.api.order.CompleteOrderCommand
 import demo.scsc.api.order.OrderCreatedEvent
 import demo.scsc.api.Payment.OrderFullyPaidEvent
 import demo.scsc.api.Payment.RequestPaymentCommand
-import demo.scsc.api.Warehouse.PackageReadyEvent
-import demo.scsc.api.Warehouse.PackageShippedEvent
-import demo.scsc.api.Warehouse.RequestShipmentCommand
-import demo.scsc.api.Warehouse.ShipPackageCommand
+import demo.scsc.api.warehouse.PackageReadyEvent
+import demo.scsc.api.warehouse.PackageShippedEvent
+import demo.scsc.api.warehouse.RequestShipmentCommand
+import demo.scsc.api.warehouse.ShipPackageCommand
 import org.axonframework.commandhandling.CommandCallback
 import org.axonframework.commandhandling.CommandMessage
 import org.axonframework.commandhandling.CommandResultMessage

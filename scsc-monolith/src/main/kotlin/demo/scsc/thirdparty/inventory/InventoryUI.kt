@@ -1,6 +1,6 @@
 package demo.scsc.thirdparty.inventory
 
-import demo.scsc.api.ProductCatalog
+import demo.scsc.api.productCatalog
 import org.axonframework.config.Configuration
 import java.awt.BorderLayout
 import java.awt.Dimension
@@ -29,7 +29,7 @@ class InventoryUI(private val configuration: Configuration, private val inventor
             inventory.forEach(
                 Consumer { (id, name, desc, price, image, onSale): InventoryProduct ->
                     configuration.eventGateway().publish(
-                        ProductCatalog.ProductUpdateReceivedEvent(
+                        productCatalog.ProductUpdateReceivedEvent(
                             id,
                             name,
                             desc,

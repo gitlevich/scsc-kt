@@ -32,7 +32,6 @@ services:
     command: postgres -c 'max_connections=200'
     container_name: postgres-scsc
     restart: always
-    # The PGUSER environment variable is required by the healthcheck test.
     environment:
       - POSTGRES_DB=scsc
       - PGUSER=scsc
