@@ -76,21 +76,18 @@ class OrdersProjection {
             orderEntities.stream()
                 .map { orderEntity: OrderEntity ->
                     orderEntity.items.stream().map(OrderEntityItem::price)
-                        .reduce(BigDecimal.ZERO) { obj: BigDecimal?, augend: BigDecimal? -> obj?.add(augend) }?.let { price ->
+                        .reduce(BigDecimal.ZERO) { obj: BigDecimal?, augend: BigDecimal? -> obj?.add(augend) }
+                        ?.let { price ->
                             GetOrdersQueryResponse.Order(
-                                orderEntity.id!!,
-                                price,
-                                orderEntity.items.stream()
-                                    .map { (_, name, price): OrderEntityItem ->
-                                        OrderLine(
-                                            name!!,
-                                            price!!
-                                        )
-                                    }.collect(Collectors.toList()),
-                                orderEntity.owner!!,
-                                orderEntity.isPaid,
-                                orderEntity.isPrepared,
-                                orderEntity.isReady
+                                id = orderEntity.id!!,
+                                total = price,
+                                lines = orderEntity.items.stream()
+                                    .map { (_, name, price): OrderEntityItem -> OrderLine(name!!, price!!) }
+                                    .collect(Collectors.toList()),
+                                owner = orderEntity.owner!!,
+                                isPaid = orderEntity.isPaid,
+                                isPrepared = orderEntity.isPrepared,
+                                isShipped = orderEntity.isReady
                             )
                         }
                 }
@@ -124,10 +121,7 @@ class OrdersProjection {
     }
 
     @MessageHandlerInterceptor(messageType = EventMessage::class)
-    fun intercept(
-        message: EventMessage<*>,
-        interceptorChain: InterceptorChain
-    ) {
+    fun intercept(message: EventMessage<*>, interceptorChain: InterceptorChain) {
         LOG.info("[    EVENT ] " + message.payload.toString())
         interceptorChain.proceed()
     }
