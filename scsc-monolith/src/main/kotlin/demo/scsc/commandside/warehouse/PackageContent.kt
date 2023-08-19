@@ -25,9 +25,7 @@ class PackageContent(private val orderId: UUID, items: List<UUID>) {
         )
     }
 
-    fun ready(): Boolean {
-        return !items.containsValue(false)
-    }
+    fun ready(): Boolean = !items.containsValue(false)
 
     @CommandHandler
     fun on(addProductToPackageCommand: AddProductToPackageCommand) {

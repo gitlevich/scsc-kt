@@ -28,7 +28,7 @@ class Shipment() {
     private lateinit var shipmentId: UUID
 
     @AggregateMember
-    private var packageContent: PackageContent? = null
+    private lateinit var packageContent: PackageContent
 
     @CommandHandler
     constructor(requestShipmentCommand: RequestShipmentCommand) : this() {
@@ -45,7 +45,7 @@ class Shipment() {
 
     @CommandHandler
     fun on(shipPackageCommand: ShipPackageCommand) {
-        if (!packageContent!!.ready())
+        if (!packageContent.ready())
             throw CommandExecutionException("Package not ready", null, ShipmentImpossible.NOT_READY)
         applyEvent(PackageShippedEvent(shipmentId))
     }

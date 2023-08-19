@@ -11,21 +11,21 @@ import org.axonframework.extensions.kotlin.applyEvent
 import org.axonframework.messaging.InterceptorChain
 import org.axonframework.messaging.interceptors.MessageHandlerInterceptor
 import org.axonframework.modelling.command.AggregateIdentifier
-import org.axonframework.modelling.command.AggregateLifecycle.*
+import org.axonframework.modelling.command.AggregateLifecycle.isLive
+import org.axonframework.modelling.command.AggregateLifecycle.markDeleted
 import org.slf4j.LoggerFactory
 import java.math.BigDecimal
 import java.util.*
 
 class OrderPayment() {
     @AggregateIdentifier
-    private var orderPaymentId: UUID? = null
-    private var orderId: UUID? = null
-    private var requestedAmount: BigDecimal? = null
+    private lateinit var orderPaymentId: UUID
+    private lateinit var orderId: UUID
+    private lateinit var requestedAmount: BigDecimal
     private var paidAmount = BigDecimal.ZERO
 
     @CommandHandler
     constructor(command: RequestPaymentCommand) : this() {
-
         if (command.amount <= BigDecimal.ZERO)
             throw CommandExecutionException("Can't process payments for zero or negative amounts", null)
 
@@ -40,13 +40,13 @@ class OrderPayment() {
 
     @CommandHandler
     fun on(command: payment.ProcessPaymentCommand) {
-        val leftToPay = requestedAmount!!.subtract(paidAmount)
+        val leftToPay = requestedAmount.subtract(paidAmount)
         if (command.amount > leftToPay) {
             throw CommandExecutionException("Can't pay more than you own", null)
         }
-        applyEvent(payment.PaymentReceivedEvent(orderPaymentId!!, command.amount))
+        applyEvent(payment.PaymentReceivedEvent(orderPaymentId, command.amount))
         if (command.amount.compareTo(leftToPay) == 0) {
-            applyEvent(payment.OrderFullyPaidEvent(orderPaymentId!!, orderId!!))
+            applyEvent(payment.OrderFullyPaidEvent(orderPaymentId, orderId))
         }
     }
 
