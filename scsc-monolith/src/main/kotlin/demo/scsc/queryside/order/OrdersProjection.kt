@@ -9,6 +9,7 @@ import demo.scsc.api.order.OrderCreatedEvent
 import demo.scsc.api.payment.OrderFullyPaidEvent
 import demo.scsc.api.warehouse.PackageReadyEvent
 import demo.scsc.config.JpaPersistenceUnit.Companion.forName
+import demo.scsc.queryside.tx
 import org.axonframework.config.ProcessingGroup
 import org.axonframework.eventhandling.EventHandler
 import org.axonframework.eventhandling.EventMessage
@@ -25,44 +26,34 @@ import java.util.stream.Collectors
 class OrdersProjection {
     @EventHandler
     fun on(orderCreatedEvent: OrderCreatedEvent) {
-        val em = forName("SCSC")!!.newEntityManager
-        em.transaction.begin()
-        em.persist(toEntity(orderCreatedEvent))
-        em.transaction.commit()
-        em.close()
+        tx { it.persist(toEntity(orderCreatedEvent)) }
     }
 
     @EventHandler
     fun on(orderFullyPaidEvent: OrderFullyPaidEvent) {
-        val em = forName("SCSC")!!.newEntityManager
-        em.transaction.begin()
-        val orderEntity = em.find(OrderEntity::class.java, orderFullyPaidEvent.orderId)
-        orderEntity.isPaid = true
-        em.merge(orderEntity)
-        em.transaction.commit()
-        em.close()
+        tx {
+            val orderEntity = it.find(OrderEntity::class.java, orderFullyPaidEvent.orderId)
+            orderEntity.isPaid = true
+            it.merge(orderEntity)
+        }
     }
 
     @EventHandler
     fun on(packageReadyEvent: PackageReadyEvent) {
-        val em = forName("SCSC")!!.newEntityManager
-        em.transaction.begin()
-        val orderEntity = em.find(OrderEntity::class.java, packageReadyEvent.orderId)
-        orderEntity.isPrepared = true
-        em.merge(orderEntity)
-        em.transaction.commit()
-        em.close()
+        tx {
+            val orderEntity = it.find(OrderEntity::class.java, packageReadyEvent.orderId)
+            orderEntity.isPrepared = true
+            it.merge(orderEntity)
+        }
     }
 
     @EventHandler
     fun on(orderCompletedEvent: OrderCompletedEvent) {
-        val em = forName("SCSC")!!.newEntityManager
-        em.transaction.begin()
-        val orderEntity = em.find(OrderEntity::class.java, orderCompletedEvent.orderId)
-        orderEntity.isReady = true
-        em.merge(orderEntity)
-        em.transaction.commit()
-        em.close()
+        tx {
+            val orderEntity = it.find(OrderEntity::class.java, orderCompletedEvent.orderId)
+            orderEntity.isReady = true
+            it.merge(orderEntity)
+        }
     }
 
     @QueryHandler
@@ -99,10 +90,7 @@ class OrdersProjection {
 
     @ResetHandler
     fun onReset(resetContext: ResetContext<*>?) {
-        val em = forName("SCSC")!!.newEntityManager
-        em.transaction.begin()
-        em.createQuery("DELETE FROM OrderEntity").executeUpdate()
-        em.transaction.commit()
+        tx { it.createQuery("DELETE FROM OrderEntity").executeUpdate() }
     }
 
     private fun toEntity(orderCreatedEvent: OrderCreatedEvent): OrderEntity {
