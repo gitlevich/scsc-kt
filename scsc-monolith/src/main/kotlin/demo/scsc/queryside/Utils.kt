@@ -14,7 +14,7 @@ fun tx(f: (EntityManager) -> Unit) {
     em.close()
 }
 
-fun <QUERY, RESPONSE> withEm(q: QUERY, f: (EntityManager) -> RESPONSE): RESPONSE = try {
+fun <QUERY, RESPONSE> answer(q: QUERY, f: (EntityManager) -> RESPONSE): RESPONSE = try {
     f(JpaPersistenceUnit.forName(SCSC)!!.newEntityManager)
 } catch (e: NoResultException) {
     throw QueryExecutionException("Unable to execute query ${q.toString()}", null)

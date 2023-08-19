@@ -8,7 +8,7 @@ import org.axonframework.common.transaction.TransactionManager
 
 class JpaPersistenceUnit private constructor(persistenceUnit: String?) {
     private val emf: EntityManagerFactory
-    private val entityManagerThreadLocal = ThreadLocal<EntityManager?>()
+    private val entityManagerThreadLocal = ThreadLocal<EntityManager>()
 
     init {
         emf = Persistence.createEntityManagerFactory(persistenceUnit)
@@ -31,9 +31,9 @@ class JpaPersistenceUnit private constructor(persistenceUnit: String?) {
         get() = JpaTransactionManager(this)
 
     companion object {
-        private val persistenceUnits: MutableMap<String?, JpaPersistenceUnit> = HashMap()
-        @JvmStatic
-        fun forName(persistenceUnitName: String?): JpaPersistenceUnit? {
+        private val persistenceUnits: MutableMap<String, JpaPersistenceUnit> = mutableMapOf()
+
+        fun forName(persistenceUnitName: String): JpaPersistenceUnit? {
             if (persistenceUnits.containsKey(persistenceUnitName)) {
                 return persistenceUnits[persistenceUnitName]
             }
