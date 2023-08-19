@@ -24,43 +24,42 @@ class OrderPayment() {
     private var paidAmount = BigDecimal.ZERO
 
     @CommandHandler
-    constructor(requestPaymentCommand: RequestPaymentCommand) : this() {
+    constructor(command: RequestPaymentCommand) : this() {
 
-        if (requestPaymentCommand.amount <= BigDecimal.ZERO)
+        if (command.amount <= BigDecimal.ZERO)
             throw CommandExecutionException("Can't process payments for zero or negative amounts", null)
 
         applyEvent(
             payment.PaymentRequestedEvent(
-                requestPaymentCommand.orderPaymentId,
-                requestPaymentCommand.orderId,
-                requestPaymentCommand.amount
+                command.orderPaymentId,
+                command.orderId,
+                command.amount
             )
         )
     }
 
     @CommandHandler
-    fun on(processPaymentCommand: payment.ProcessPaymentCommand) {
+    fun on(command: payment.ProcessPaymentCommand) {
         val leftToPay = requestedAmount!!.subtract(paidAmount)
-        if (processPaymentCommand.amount.compareTo(leftToPay) > 0) {
+        if (command.amount > leftToPay) {
             throw CommandExecutionException("Can't pay more than you own", null)
         }
-        applyEvent(payment.PaymentReceivedEvent(orderPaymentId!!, processPaymentCommand.amount))
-        if (processPaymentCommand.amount.compareTo(leftToPay) == 0) {
-//            apply(new OrderFullyPaidEvent(orderId, orderPaymentId));
+        applyEvent(payment.PaymentReceivedEvent(orderPaymentId!!, command.amount))
+        if (command.amount.compareTo(leftToPay) == 0) {
             applyEvent(payment.OrderFullyPaidEvent(orderPaymentId!!, orderId!!))
         }
     }
 
     @EventSourcingHandler
-    fun on(paymentRequestedEvent: payment.PaymentRequestedEvent) {
-        orderPaymentId = paymentRequestedEvent.orderPaymentId
-        orderId = paymentRequestedEvent.orderId
-        requestedAmount = paymentRequestedEvent.amount
+    fun on(event: payment.PaymentRequestedEvent) {
+        orderPaymentId = event.orderPaymentId
+        orderId = event.orderId
+        requestedAmount = event.amount
     }
 
     @EventSourcingHandler
-    fun on(paymentReceivedEvent: payment.PaymentReceivedEvent) {
-        paidAmount = paidAmount.add(paymentReceivedEvent.amount)
+    fun on(event: payment.PaymentReceivedEvent) {
+        paidAmount = paidAmount.add(event.amount)
     }
 
     @EventSourcingHandler
@@ -69,19 +68,13 @@ class OrderPayment() {
     }
 
     @MessageHandlerInterceptor(messageType = CommandMessage::class)
-    fun intercept(
-        message: CommandMessage<*>,
-        interceptorChain: InterceptorChain
-    ) {
+    fun intercept(message: CommandMessage<*>, interceptorChain: InterceptorChain) {
         LOG.info("[  COMMAND ] ${message.payload}")
         interceptorChain.proceed()
     }
 
     @MessageHandlerInterceptor(messageType = EventMessage::class)
-    fun intercept(
-        message: EventMessage<*>,
-        interceptorChain: InterceptorChain
-    ) {
+    fun intercept(message: EventMessage<*>, interceptorChain: InterceptorChain) {
         if (isLive()) LOG.info("[    EVENT ] ${message.payload}") else LOG.info("[ SOURCING ] ${message.payload}")
         interceptorChain.proceed()
     }

@@ -76,10 +76,10 @@ class OrdersProjection {
             orderEntities.stream()
                 .map { orderEntity: OrderEntity ->
                     orderEntity.items.stream().map(OrderEntityItem::price)
-                        .reduce(BigDecimal.ZERO) { obj: BigDecimal?, augend: BigDecimal? -> obj?.add(augend) }?.let {
+                        .reduce(BigDecimal.ZERO) { obj: BigDecimal?, augend: BigDecimal? -> obj?.add(augend) }?.let { price ->
                             GetOrdersQueryResponse.Order(
                                 orderEntity.id!!,
-                                it,
+                                price,
                                 orderEntity.items.stream()
                                     .map { (_, name, price): OrderEntityItem ->
                                         OrderLine(

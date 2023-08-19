@@ -25,7 +25,7 @@ import java.util.*
 import java.util.stream.Collectors
 
 class OrderCompletionProcess {
-    var orderId: UUID? = null
+    lateinit var orderId: UUID
 
     lateinit var orderPaymentId: UUID
 
@@ -83,7 +83,7 @@ class OrderCompletionProcess {
     @SagaEventHandler(keyName = "shipmentId", associationProperty = "shipmentId")
     @EndSaga
     fun on(packageShippedEvent: PackageShippedEvent, commandGateway: CommandGateway) {
-        commandGateway.send<Any>(CompleteOrderCommand(orderId!!))
+        commandGateway.send<Any>(CompleteOrderCommand(orderId))
     }
 
     @MessageHandlerInterceptor(messageType = EventMessage::class)
