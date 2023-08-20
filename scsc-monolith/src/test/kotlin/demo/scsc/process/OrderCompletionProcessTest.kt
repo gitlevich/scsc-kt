@@ -3,7 +3,8 @@ package demo.scsc.process
 import demo.scsc.api.order
 import demo.scsc.api.payment
 import demo.scsc.api.warehouse
-import org.axonframework.test.matchers.Matchers
+import io.mockk.every
+import io.mockk.mockk
 import org.axonframework.test.saga.SagaTestFixture
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -11,11 +12,15 @@ import java.math.BigDecimal
 import java.util.*
 
 class OrderCompletionProcessTest {
-    private lateinit var process: SagaTestFixture<OrderCompletionProcess>
+    private val process = SagaTestFixture(OrderCompletionProcess::class.java)
 
     @BeforeEach
     fun setUp() {
-        process = SagaTestFixture(OrderCompletionProcess::class.java)
+        val ids = listOf(orderPaymentId, shipmentId).iterator()
+        val nextUuid: () -> UUID = mockk<() -> UUID>(relaxed = true).also {
+            every { it.invoke() } returns ids.next() andThen ids.next()
+        }
+        process.registerResource(nextUuid)
     }
 
     @Test
@@ -24,14 +29,10 @@ class OrderCompletionProcessTest {
             .whenPublishingA(orderCreatedEvent)
             .expectActiveSagas(1)
             .expectAssociationWith("orderId", orderCreatedEvent.orderId.toString())
-//            .expectDispatchedCommandsMatching(
-//                Matchers.matches { commands ->
-//                    val commandTypes = commands.map { it!!::class }
-//                    commands.size == 2 &&
-//                            commandTypes.contains(requestPaymentCommand::class) &&
-//                            commandTypes.contains(requestShipmentCommand::class)
-//                }
-//            )
+            .expectDispatchedCommands(
+                requestPaymentCommand,
+                requestShipmentCommand
+            )
     }
 
     companion object {

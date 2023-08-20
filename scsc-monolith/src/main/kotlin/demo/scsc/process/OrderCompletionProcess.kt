@@ -37,10 +37,10 @@ class OrderCompletionProcess {
 
     @StartSaga
     @SagaEventHandler(keyName = "orderId", associationProperty = "orderId")
-    fun on(event: OrderCreatedEvent, commandGateway: CommandGateway) {
+    fun on(event: OrderCreatedEvent, commandGateway: CommandGateway, nextUuid: () -> UUID = { UUID.randomUUID() }) {
         orderId = event.orderId
-        orderPaymentId = UUID.randomUUID()
-        shipmentId = UUID.randomUUID()
+        orderPaymentId = nextUuid()
+        shipmentId = nextUuid()
         associateWith("orderPaymentId", orderPaymentId.toString())
         associateWith("shipmentId", shipmentId.toString())
         commandGateway.send(

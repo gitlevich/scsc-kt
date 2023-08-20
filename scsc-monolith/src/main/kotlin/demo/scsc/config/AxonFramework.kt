@@ -2,6 +2,8 @@ package demo.scsc.config
 
 import org.axonframework.config.*
 import org.axonframework.eventhandling.tokenstore.jpa.JpaTokenStore
+import org.axonframework.messaging.annotation.ParameterResolver
+import org.axonframework.messaging.annotation.ParameterResolverFactory
 import org.axonframework.modelling.saga.repository.jpa.JpaSagaStore
 import org.axonframework.serialization.json.JacksonSerializer
 
@@ -18,6 +20,13 @@ class AxonFramework private constructor(private val applicationName: String) {
         configuration = configurer.buildConfiguration()
         configuration.start()
         return configuration
+    }
+
+    fun withParameterResolvers(resolvers: List<ParameterResolverFactory>): AxonFramework {
+        resolvers.forEach { resolver ->
+            configurer.registerComponent(ParameterResolver::class.java) { resolver as ParameterResolver<*> }
+        }
+        return this
     }
 
     fun startAndWait() {

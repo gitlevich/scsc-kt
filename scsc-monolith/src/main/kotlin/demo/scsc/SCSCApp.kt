@@ -7,6 +7,7 @@ import demo.scsc.commandside.payment.OrderPayment
 import demo.scsc.commandside.shoppingcart.Cart
 import demo.scsc.commandside.warehouse.Shipment
 import demo.scsc.config.AxonFramework
+import demo.scsc.config.UuidGenParameterResolverFactory
 import demo.scsc.process.OrderCompletionProcess
 import demo.scsc.queryside.order.OrdersProjection
 import demo.scsc.queryside.payment.PaymentProjection
@@ -33,6 +34,8 @@ fun main() {
             PaymentProjection(),
             ShippingProjection()
         )
+        // TODO Help. This doesn't register a parameter resolver. Sorry, unable to understand what needs to be done.
+        .withParameterResolvers(listOf(UuidGenParameterResolverFactory()))
         .connectedToInspectorAxon("1ca6fe24", "087cb5cb", "c31c8730b7544d82a8a6b7cd114d25f5")
         .startAndWait()
 }
