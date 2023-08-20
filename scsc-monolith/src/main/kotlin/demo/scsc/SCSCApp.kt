@@ -1,5 +1,6 @@
 package demo.scsc
 
+import demo.scsc.Constants.SCSC
 import demo.scsc.commandside.order.Order
 import demo.scsc.commandside.order.ProductValidation
 import demo.scsc.commandside.payment.OrderPayment
@@ -14,19 +15,16 @@ import demo.scsc.queryside.shoppingcart.CartsProjection
 import demo.scsc.queryside.warehouse.ShippingProjection
 
 fun main() {
-    AxonFramework.configure("SCSC App")
+    AxonFramework.configure("$SCSC App")
         .withJsonSerializer()
-        .withJPATokenStoreIn("SCSC")
+        .withJPATokenStoreIn(SCSC)
         .withAggregates(
             Cart::class.java,
             Order::class.java,
             OrderPayment::class.java,
             Shipment::class.java
         )
-        .withJpaSagas(
-            "SCSC",
-            OrderCompletionProcess::class.java
-        )
+        .withJpaSagas(SCSC, OrderCompletionProcess::class.java)
         .withMessageHandlers(
             ProductsProjection(),
             CartsProjection(),

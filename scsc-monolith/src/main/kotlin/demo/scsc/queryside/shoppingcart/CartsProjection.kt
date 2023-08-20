@@ -48,7 +48,7 @@ class CartsProjection {
     }
 
     @QueryHandler
-    fun on(getCartQuery: shoppingCart.GetCartQuery): Optional<shoppingCart.GetCartQueryResponse> {
+    fun on(getCartQuery: shoppingCart.GetCartQuery): Optional<shoppingCart.GetCartQuery.Response> {
         val cartStore = CartStore()
         val getCartQueryResponse = cartStore.getOwnersCarts(getCartQuery.owner)
         return Optional.ofNullable(getCartQueryResponse)

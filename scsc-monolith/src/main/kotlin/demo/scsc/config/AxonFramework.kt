@@ -4,8 +4,6 @@ import org.axonframework.config.*
 import org.axonframework.eventhandling.tokenstore.jpa.JpaTokenStore
 import org.axonframework.modelling.saga.repository.jpa.JpaSagaStore
 import org.axonframework.serialization.json.JacksonSerializer
-import java.util.Objects
-import java.util.function.Consumer
 
 class AxonFramework private constructor(private val applicationName: String) {
     private val configurer: Configurer
@@ -40,16 +38,16 @@ class AxonFramework private constructor(private val applicationName: String) {
     fun withJsonSerializer(): AxonFramework {
         val jacksonSerializer = JacksonSerializer.defaultSerializer()
         configurer
-            .configureSerializer { c: Configuration? -> jacksonSerializer }
-            .configureMessageSerializer { c: Configuration? -> jacksonSerializer }
-            .configureEventSerializer { c: Configuration? -> jacksonSerializer }
+            .configureSerializer { jacksonSerializer }
+            .configureMessageSerializer { jacksonSerializer }
+            .configureEventSerializer { jacksonSerializer }
         return this
     }
 
     fun withJPATokenStoreIn(persistenceUnitName: String): AxonFramework {
         val jpaPersistenceUnit: JpaPersistenceUnit = jpaPersistenceUnit(persistenceUnitName)
         configurer
-            .eventProcessing { eventProcessingConfigurer: EventProcessingConfigurer ->
+            .eventProcessing { eventProcessingConfigurer ->
                 eventProcessingConfigurer.registerDefaultTransactionManager { jpaPersistenceUnit.transactionManager }
                 eventProcessingConfigurer.registerTokenStore {
                     JpaTokenStore.builder()
@@ -61,18 +59,18 @@ class AxonFramework private constructor(private val applicationName: String) {
         return this
     }
 
-    private fun jpaPersistenceUnit(persistenceUnitName: String) = (JpaPersistenceUnit.forName(persistenceUnitName)
-        ?: throw RuntimeException("No JPA persistence unit found with name $persistenceUnitName"))
+    private fun jpaPersistenceUnit(persistenceUnitName: String) = JpaPersistenceUnit.forName(persistenceUnitName)
+        ?: throw RuntimeException("No JPA persistence unit found with name $persistenceUnitName")
 
     fun withAggregates(vararg aggregates: Class<*>): AxonFramework {
-        for (aggregate in aggregates) {
+        aggregates.forEach { aggregate ->
             configurer.configureAggregate(aggregate)
         }
         return this
     }
 
-    fun withMessageHandlers(vararg handlers: Any?): AxonFramework {
-        for (handler in handlers) {
+    fun withMessageHandlers(vararg handlers: Any): AxonFramework {
+        handlers.forEach { handler ->
             configurer.registerMessageHandler { handler }
         }
         return this
@@ -80,12 +78,12 @@ class AxonFramework private constructor(private val applicationName: String) {
 
     fun withJpaSagas(persistenceUnitName: String, vararg sagas: Class<*>): AxonFramework {
         val jpaPersistenceUnit = jpaPersistenceUnit(persistenceUnitName)
-        for (saga in sagas) {
-            configurer.eventProcessing { eventProcessingConfigurer: EventProcessingConfigurer ->
+        sagas.forEach { saga ->
+            configurer.eventProcessing { eventProcessingConfigurer ->
                 eventProcessingConfigurer.registerSaga(saga) { sagaConfigurer ->
-                    sagaConfigurer.configureSagaStore { c: Configuration ->
+                    sagaConfigurer.configureSagaStore {
                         JpaSagaStore.builder()
-                            .serializer(c.serializer())
+                            .serializer(it.serializer())
                             .entityManagerProvider(jpaPersistenceUnit.entityManagerProvider)
                             .build()
                     }
@@ -108,9 +106,6 @@ class AxonFramework private constructor(private val applicationName: String) {
     companion object {
         private val LOCK = Any()
 
-        @JvmStatic
-        fun configure(name: String): AxonFramework {
-            return AxonFramework(name)
-        }
+        fun configure(name: String): AxonFramework = AxonFramework(name)
     }
 }

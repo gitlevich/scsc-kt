@@ -27,45 +27,47 @@ import java.util.stream.Collectors
 class OrderCompletionProcess {
     lateinit var orderId: UUID
 
-    lateinit var orderPaymentId: UUID
+    private lateinit var orderPaymentId: UUID
 
-    lateinit var shipmentId: UUID
+    private lateinit var shipmentId: UUID
 
-    var isPaid = false
+    private var isPaid = false
 
-    var isShipmentReady = false
+    private var isShipmentReady = false
 
     @StartSaga
     @SagaEventHandler(keyName = "orderId", associationProperty = "orderId")
-    fun on(orderCreatedEvent: OrderCreatedEvent, commandGateway: CommandGateway) {
-        orderId = orderCreatedEvent.orderId
+    fun on(event: OrderCreatedEvent, commandGateway: CommandGateway) {
+        orderId = event.orderId
         orderPaymentId = UUID.randomUUID()
         shipmentId = UUID.randomUUID()
         associateWith("orderPaymentId", orderPaymentId.toString())
         associateWith("shipmentId", shipmentId.toString())
         commandGateway.send(
             RequestPaymentCommand(
-                orderPaymentId,
-                orderCreatedEvent.orderId,
-                orderCreatedEvent.items.stream()
-                    .map(OrderCreatedEvent.OrderItem::price)
-                    .reduce(BigDecimal.ZERO, BigDecimal::add)
-            ), errorHandlingCallback()
+                orderPaymentId = orderPaymentId,
+                orderId = event.orderId,
+                amount = event.items.asSequence()
+                    .map { it.price }
+                    .reduce { acc, c -> acc.add(c) }
+            ),
+            errorHandlingCallback()
         )
         commandGateway.send(
             RequestShipmentCommand(
-                shipmentId,
-                orderCreatedEvent.orderId,
-                orderCreatedEvent.owner,
-                orderCreatedEvent.items.stream()
-                    .map(OrderCreatedEvent.OrderItem::id)
-                    .collect(Collectors.toList())
-            ), errorHandlingCallback()
+                shipmentId = shipmentId,
+                orderId = event.orderId,
+                recipient = event.owner,
+                products = event.items.asSequence()
+                    .map { it.id }
+                    .toList()
+            ),
+            errorHandlingCallback()
         )
     }
 
     @SagaEventHandler(keyName = "orderId", associationProperty = "orderId")
-    fun on(orderFullyPaidEvent: OrderFullyPaidEvent?, commandGateway: CommandGateway) {
+    fun on(event: OrderFullyPaidEvent, commandGateway: CommandGateway) {
         isPaid = true
         if (isShipmentReady) {
             commandGateway.send<Any>(ShipPackageCommand(shipmentId))
@@ -73,24 +75,19 @@ class OrderCompletionProcess {
     }
 
     @SagaEventHandler(keyName = "shipmentId", associationProperty = "shipmentId")
-    fun on(packageReadyEvent: PackageReadyEvent?, commandGateway: CommandGateway) {
+    fun on(event: PackageReadyEvent, commandGateway: CommandGateway) {
         isShipmentReady = true
-        if (isPaid) {
-            commandGateway.send<Any>(ShipPackageCommand(shipmentId))
-        }
+        if (isPaid) commandGateway.send<Any>(ShipPackageCommand(shipmentId))
     }
 
     @SagaEventHandler(keyName = "shipmentId", associationProperty = "shipmentId")
     @EndSaga
-    fun on(packageShippedEvent: PackageShippedEvent, commandGateway: CommandGateway) {
+    fun on(event: PackageShippedEvent, commandGateway: CommandGateway) {
         commandGateway.send<Any>(CompleteOrderCommand(orderId))
     }
 
     @MessageHandlerInterceptor(messageType = EventMessage::class)
-    fun intercept(
-        message: EventMessage<*>,
-        interceptorChain: InterceptorChain
-    ) {
+    fun intercept(message: EventMessage<*>, interceptorChain: InterceptorChain) {
         LOG.info("[    EVENT ] " + message.payload.toString())
         interceptorChain.proceed()
     }

@@ -32,7 +32,6 @@ class Shipment() {
 
     @CommandHandler
     constructor(requestShipmentCommand: RequestShipmentCommand) : this() {
-
         applyEvent(
             ShipmentRequestedEvent(
                 requestShipmentCommand.shipmentId,
@@ -44,20 +43,20 @@ class Shipment() {
     }
 
     @CommandHandler
-    fun on(shipPackageCommand: ShipPackageCommand) {
+    fun on(command: ShipPackageCommand) {
         if (!packageContent.ready())
             throw CommandExecutionException("Package not ready", null, ShipmentImpossible.NOT_READY)
-        applyEvent(PackageShippedEvent(shipmentId))
+        applyEvent(PackageShippedEvent(command.shipmentId))
     }
 
     @EventSourcingHandler
-    fun on(shipmentRequestedEvent: ShipmentRequestedEvent, metaData: MetaData) {
-        shipmentId = shipmentRequestedEvent.shipmentId
-        packageContent = PackageContent((metaData["orderId"] as UUID?)!!, shipmentRequestedEvent.products)
+    fun on(event: ShipmentRequestedEvent, metaData: MetaData) {
+        shipmentId = event.shipmentId
+        packageContent = PackageContent((metaData["orderId"] as UUID?)!!, event.products)
     }
 
     @EventSourcingHandler
-    fun on(packageShippedEvent: PackageShippedEvent) {
+    fun on(event: PackageShippedEvent) {
         if (isLive()) {
             /*
                 We end this demo here!
@@ -73,20 +72,14 @@ class Shipment() {
     }
 
     @MessageHandlerInterceptor(messageType = CommandMessage::class)
-    fun intercept(
-        message: CommandMessage<*>,
-        interceptorChain: InterceptorChain
-    ) {
-        LOG.info("[  COMMAND ] " + message.payload.toString())
+    fun intercept(message: CommandMessage<*>, interceptorChain: InterceptorChain) {
+        LOG.info("[  COMMAND ] ${message.payload}")
         interceptorChain.proceed()
     }
 
     @MessageHandlerInterceptor(messageType = EventMessage::class)
-    fun intercept(
-        message: EventMessage<*>,
-        interceptorChain: InterceptorChain
-    ) {
-        if (isLive()) LOG.info("[    EVENT ] " + message.payload.toString()) else LOG.info("[ SOURCING ] " + message.payload.toString())
+    fun intercept(message: EventMessage<*>, interceptorChain: InterceptorChain) {
+        if (isLive()) LOG.info("[    EVENT ] ${message.payload}") else LOG.info("[ SOURCING ] ${message.payload}")
         interceptorChain.proceed()
     }
 

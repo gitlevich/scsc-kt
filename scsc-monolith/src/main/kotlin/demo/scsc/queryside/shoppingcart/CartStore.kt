@@ -1,6 +1,6 @@
 package demo.scsc.queryside.shoppingcart
 
-import demo.scsc.api.shoppingCart.GetCartQueryResponse
+import demo.scsc.api.shoppingCart.GetCartQuery
 import demo.scsc.config.microstream.MicrostreamStore.forLocation
 import one.microstream.storage.types.StorageManager
 import java.util.*
@@ -15,7 +15,7 @@ class CartStore {
     fun saveCart(owner: String, cartId: UUID) {
         val cartsRoot = getCartsRoot(true)
         cartsRoot!!.byUser[owner] = cartId
-        cartsRoot.byId[cartId] = GetCartQueryResponse(cartId, LinkedList())
+        cartsRoot.byId[cartId] = GetCartQuery.Response(cartId, LinkedList())
         storageManager.store(cartsRoot.byUser)
         storageManager.store(cartsRoot.byId)
     }
@@ -37,16 +37,16 @@ class CartStore {
         storageManager.store(products - productId)
     }
 
-    fun getOwnersCarts(owner: String): GetCartQueryResponse? {
-        var getCartQueryResponse: GetCartQueryResponse? = null
+    fun getOwnersCarts(owner: String): GetCartQuery.Response? {
+        var response: GetCartQuery.Response? = null
         val cartsRoot = cartsRoot
         if (cartsRoot != null) {
             val cartId = cartsRoot.byUser[owner]
             if (cartId != null) {
-                getCartQueryResponse = cartsRoot.byId[cartId]
+                response = cartsRoot.byId[cartId]
             }
         }
-        return getCartQueryResponse
+        return response
     }
 
     fun removeCart(cartId: UUID) {
@@ -77,7 +77,7 @@ class CartStore {
 
     class CartsRoot {
         val byUser: MutableMap<String, UUID> = HashMap()
-        val byId: MutableMap<UUID, GetCartQueryResponse> = HashMap()
+        val byId: MutableMap<UUID, GetCartQuery.Response> = HashMap()
         override fun toString(): String {
             return "StorageRoot{" +
                     "cartsByUser=" + byUser +
