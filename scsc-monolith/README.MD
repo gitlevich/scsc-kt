@@ -25,3 +25,7 @@ Next steps:
 - draw context map with respective aggregate roots, etc. 
 - add "narratives", that is reference scenarios told as command/event or policy/command sequences 
 - ???
+
+### [Implementation details](docs/ImplementationDetails.md)
+
+

@@ -1,5 +1,6 @@
 package demo.scsc.config
 
+import com.typesafe.config.Config
 import org.axonframework.config.*
 import org.axonframework.eventhandling.tokenstore.jpa.JpaTokenStore
 import org.axonframework.messaging.annotation.ClasspathParameterResolverFactory
@@ -7,9 +8,10 @@ import org.axonframework.messaging.annotation.MultiParameterResolverFactory
 import org.axonframework.messaging.annotation.ParameterResolverFactory
 import org.axonframework.modelling.saga.repository.jpa.JpaSagaStore
 import org.axonframework.serialization.json.JacksonSerializer
+import org.slf4j.LoggerFactory
 
 class AxonFramework private constructor(private val applicationName: String) {
-    private val configurer: Configurer
+    internal val configurer: Configurer
     private lateinit var configuration: Configuration
 
     init {
@@ -23,13 +25,18 @@ class AxonFramework private constructor(private val applicationName: String) {
         return configuration
     }
 
-    fun withParameterResolvers(parameterResolverFactories: List<ParameterResolverFactory>): AxonFramework {
-        configurer.registerComponent(ParameterResolverFactory::class.java) {
+    fun withCustomParameterResolverFactories(customParameterResolverFactories: List<ParameterResolverFactory>): AxonFramework {
+        if (customParameterResolverFactories.isNotEmpty()) configurer.registerComponent(ParameterResolverFactory::class.java) {
+            LOG.info("Registering custom parameter resolver factories:")
+            customParameterResolverFactories.forEach { factory ->
+                LOG.info("  - ${factory::class.java.name}")
+            }
+
             MultiParameterResolverFactory(
                 listOf(
                     ClasspathParameterResolverFactory.forClass(this::class.java),
                     ConfigurationParameterResolverFactory(configuration)
-                ) + parameterResolverFactories
+                ) + customParameterResolverFactories
             )
         }
         return this
@@ -109,19 +116,29 @@ class AxonFramework private constructor(private val applicationName: String) {
         return this
     }
 
-    fun connectedToInspectorAxon(workspace: String, environment: String, token: String): AxonFramework {
-        InspectorAxonConnection.connect()
-            .toWorkspace(workspace)
-            .toEnvironment(environment)
-            .asApplication(applicationName)
-            .withAccessToken(token)
-            .start(configurer)
+    fun connectedToInspectorAxon(inspectorAxonConfig: Config?): AxonFramework {
+        if (inspectorAxonConfig.isInspectorAxonConfigured()) {
+            InspectorAxonConnection.connect()
+                .toWorkspace(inspectorAxonConfig!!.getString("workspace"))
+                .toEnvironment(inspectorAxonConfig.getString("environment"))
+                .asApplication(applicationName)
+                .withAccessToken(inspectorAxonConfig.getString("token"))
+                .start(configurer)
+        } else {
+            LOG.warn("Inspector Axon connection not configured. Starting without it.")
+        }
         return this
     }
 
+
+
     companion object {
         private val LOCK = Any()
+        private val LOG = LoggerFactory.getLogger(AxonFramework::class.java)
 
         fun configure(name: String): AxonFramework = AxonFramework(name)
-    }
+        fun Config?.isInspectorAxonConfigured(): Boolean = (this != null
+                && hasPath("workspace")
+                && hasPath("environment")
+                && hasPath("token"))}
 }

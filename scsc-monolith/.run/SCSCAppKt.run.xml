@@ -3,6 +3,7 @@
     <option name="MAIN_CLASS_NAME" value="demo.scsc.SCSCAppKt" />
     <module name="scsc-monolith.main" />
     <shortenClasspath name="NONE" />
+    <option name="VM_PARAMETERS" value="-DIA_WORKSPACE=1ca6fe24 -DIA_ENVIRONMENT=087cb5cb -DIA_TOKEN=c31c8730b7544d82a8a6b7cd114d25f5" />
     <extension name="net.ashald.envfile">
       <option name="IS_ENABLED" value="false" />
       <option name="IS_SUBST" value="false" />

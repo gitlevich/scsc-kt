@@ -3,6 +3,7 @@ package demo.scsc.thirdparty.warehouse
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.node.ArrayNode
+import com.typesafe.config.ConfigFactory
 import demo.scsc.config.AxonFramework.Companion.configure
 import org.axonframework.config.Configuration
 import java.io.IOException
@@ -18,7 +19,7 @@ class WarehouseSystem {
         loadInventory()
         axonFramework = configure("Warehouse System")
             .withJsonSerializer()
-            .connectedToInspectorAxon("1ca6fe24", "087cb5cb", "c31c8730b7544d82a8a6b7cd114d25f5")
+            .connectedToInspectorAxon(ConfigFactory.load().getConfig("application.axon.inspector"))
             .start()
         SwingUtilities.invokeLater { WarehouseUI(axonFramework, inventory).start() }
     }

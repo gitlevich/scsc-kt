@@ -20,6 +20,7 @@ val jacksonVersion = "2.15.1"
 val kotlinVersion = "1.9.0"
 val mockkVersion = "1.13.5"
 val assertjVersion = "3.24.2"
+val dotEnvVersion = "6.4.1"
 
 dependencies {
     // Dependency Management
@@ -54,6 +55,7 @@ dependencies {
     implementation("ch.qos.logback:logback-classic:1.4.7")
 
     implementation("io.netty:netty-resolver-dns-native-macos:4.1.96.Final")
+    implementation("com.typesafe:config:1.4.2")
 
     // ArchUnit
     implementation("com.tngtech.archunit:archunit-junit5:1.0.1")

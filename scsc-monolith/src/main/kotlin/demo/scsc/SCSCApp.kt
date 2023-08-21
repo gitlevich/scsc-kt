@@ -1,5 +1,6 @@
 package demo.scsc
 
+import com.typesafe.config.ConfigFactory
 import demo.scsc.Constants.SCSC
 import demo.scsc.commandside.order.Order
 import demo.scsc.commandside.order.ProductValidation
@@ -16,6 +17,8 @@ import demo.scsc.queryside.shoppingcart.CartsProjection
 import demo.scsc.queryside.warehouse.ShippingProjection
 
 fun main() {
+    val appConfig = ConfigFactory.load()
+
     AxonFramework.configure("$SCSC App")
         .withJsonSerializer()
         .withJPATokenStoreIn(SCSC)
@@ -34,8 +37,7 @@ fun main() {
             PaymentProjection(),
             ShippingProjection()
         )
-        // TODO Help. This doesn't register a parameter resolver. Sorry, unable to understand what needs to be done.
-        .withParameterResolvers(listOf(UuidGenParameterResolverFactory()))
-        .connectedToInspectorAxon("1ca6fe24", "087cb5cb", "c31c8730b7544d82a8a6b7cd114d25f5")
+        .withCustomParameterResolverFactories(listOf(UuidGenParameterResolverFactory()))
+        .connectedToInspectorAxon(appConfig.getConfig("application.axon.inspector"))
         .startAndWait()
 }

@@ -2,10 +2,10 @@ package demo.scsc.thirdparty.inventory
 
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.typesafe.config.ConfigFactory
 import demo.scsc.config.AxonFramework.Companion.configure
 import org.axonframework.config.Configuration
 import java.io.IOException
-import java.util.function.Consumer
 import javax.swing.SwingUtilities
 
 class InventorySystem {
@@ -16,7 +16,7 @@ class InventorySystem {
         inventory = initializeInventory()
         axonFramework = configure("Inventory System")
             .withJsonSerializer()
-            .connectedToInspectorAxon("1ca6fe24", "087cb5cb", "c31c8730b7544d82a8a6b7cd114d25f5")
+            .connectedToInspectorAxon(ConfigFactory.load().getConfig("application.axon.inspector"))
             .start()
         SwingUtilities.invokeLater { InventoryUI(axonFramework, inventory).start() }
     }
