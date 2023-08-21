@@ -9,7 +9,7 @@ import demo.scsc.api.order.OrderCreatedEvent
 import demo.scsc.api.payment.OrderFullyPaidEvent
 import demo.scsc.api.warehouse.PackageReadyEvent
 import demo.scsc.config.JpaPersistenceUnit.Companion.forName
-import demo.scsc.queryside.tx
+import demo.scsc.util.tx
 import org.axonframework.config.ProcessingGroup
 import org.axonframework.eventhandling.EventHandler
 import org.axonframework.eventhandling.EventMessage

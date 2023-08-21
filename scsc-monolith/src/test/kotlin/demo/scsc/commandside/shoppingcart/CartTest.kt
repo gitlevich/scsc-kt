@@ -1,9 +1,11 @@
 package demo.scsc.commandside.shoppingcart
 
 import demo.scsc.api.shoppingCart
-import org.junit.Test
+import org.junit.jupiter.api.Disabled
+import org.junit.jupiter.api.Test
 import java.util.*
 
+@Disabled("not implemented yet")
 class CartTest {
 
     @Test

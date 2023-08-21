@@ -31,15 +31,13 @@ class ShippingProductEntity {
             this.productId = productId
         }
 
-        override fun equals(o: Any?): Boolean {
-            if (this === o) return true
-            if (o == null || javaClass != o.javaClass) return false
-            val id = o as Id
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (other == null || javaClass != other.javaClass) return false
+            val id = other as Id
             return shippingId == id.shippingId && productId == id.productId
         }
 
-        override fun hashCode(): Int {
-            return Objects.hash(shippingId, productId)
-        }
+        override fun hashCode(): Int = Objects.hash(shippingId, productId)
     }
 }

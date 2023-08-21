@@ -7,7 +7,8 @@ It is based on [Axon Demo Project](https://github.com/azzazzel/scsc) by [Milen D
 You can find the reference scenarios (WiP) [here](docs/ReferenceScenarios.md).
 
 The goal of this project is to develop a small Axon application demonstrating various interesting features of Axon Framework
-in idiomatic Kotlin. It is motivated by the many questions I've had while developing such applications over the last few years.
+in what I think is idiomatic Kotlin. It is motivated by the many questions I've had while developing such applications 
+over the last few years.
 
 I don't have answers to many of these questions, and hope this project will help me find them. 
 

@@ -2,7 +2,7 @@ package demo.scsc.commandside.shoppingcart
 
 import demo.scsc.api.shoppingCart
 import demo.scsc.commandside.order.Order
-import demo.scsc.queryside.attemptTo
+import demo.scsc.util.attemptTo
 import org.axonframework.commandhandling.CommandExecutionException
 import org.axonframework.commandhandling.CommandHandler
 import org.axonframework.commandhandling.CommandMessage

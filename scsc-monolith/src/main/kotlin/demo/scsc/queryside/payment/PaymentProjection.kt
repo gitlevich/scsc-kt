@@ -5,8 +5,8 @@ import demo.scsc.api.payment.GetPaymentForOrderQuery
 import demo.scsc.api.payment.GetPaymentForOrderQueryResponse
 import demo.scsc.api.payment.PaymentReceivedEvent
 import demo.scsc.api.payment.PaymentRequestedEvent
-import demo.scsc.queryside.tx
-import demo.scsc.queryside.answer
+import demo.scsc.util.tx
+import demo.scsc.util.answer
 import org.axonframework.config.ProcessingGroup
 import org.axonframework.eventhandling.EventHandler
 import org.axonframework.eventhandling.EventMessage

@@ -1,4 +1,4 @@
-package demo.scsc.queryside
+package demo.scsc.util
 
 import demo.scsc.Constants.SCSC
 import demo.scsc.config.JpaPersistenceUnit
@@ -7,13 +7,19 @@ import jakarta.persistence.NoResultException
 import org.axonframework.commandhandling.CommandExecutionException
 import org.axonframework.queryhandling.QueryExecutionException
 
-fun tx(f: (EntityManager) -> Unit) {
-    val em: EntityManager = JpaPersistenceUnit.forName(SCSC)!!.newEntityManager
-    em.transaction.begin()
-    f(em)
-    em.transaction.commit()
-    em.close()
-}
+fun <RESULT> tx(f: (EntityManager) -> RESULT): RESULT =
+    JpaPersistenceUnit.forName(SCSC)!!.newEntityManager.run {
+        try {
+            transaction.begin()
+            f(this).also {
+                transaction.commit()
+                close()
+            }
+        } catch (e: Exception) {
+            transaction.rollback()
+            throw e
+        }
+    }
 
 fun <QUERY, RESPONSE> answer(q: QUERY, f: (EntityManager) -> RESPONSE): RESPONSE = try {
     f(JpaPersistenceUnit.forName(SCSC)!!.newEntityManager)

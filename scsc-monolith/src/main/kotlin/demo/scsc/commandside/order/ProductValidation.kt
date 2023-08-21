@@ -2,7 +2,7 @@ package demo.scsc.commandside.order
 
 import demo.scsc.Constants
 import demo.scsc.api.productCatalog
-import demo.scsc.config.JpaPersistenceUnit.Companion.forName
+import demo.scsc.util.tx
 import org.axonframework.config.ProcessingGroup
 import org.axonframework.eventhandling.EventHandler
 import java.math.BigDecimal
@@ -13,25 +13,20 @@ class ProductValidation {
 
     @EventHandler
     fun on(productUpdateReceivedEvent: productCatalog.ProductUpdateReceivedEvent) {
-        val em = jpaPersistenceUnit().newEntityManager
-        em.transaction.begin()
-        em.merge(toEntity(productUpdateReceivedEvent))
-        em.transaction.commit()
+        tx { it.merge(productUpdateReceivedEvent.toEntity()) }
     }
 
-    fun forProduct(id: UUID): ProductValidationInfo? = jpaPersistenceUnit()
-        .newEntityManager
-        .find(Product::class.java, id)
-        ?.let { product -> ProductValidationInfo(product) }
-
-    private fun toEntity(event: productCatalog.ProductUpdateReceivedEvent) = Product().apply {
-        id = event.id
-        name = event.name
-        price = event.price
-        isOnSale = event.onSale
+    fun forProduct(id: UUID): ProductValidationInfo? = tx {
+        it.find(Product::class.java, id)?.let { product -> ProductValidationInfo(product) }
     }
 
-    private fun jpaPersistenceUnit() = forName("SCSC")!!
+    private fun productCatalog.ProductUpdateReceivedEvent.toEntity() =
+        Product().let {
+            it.id = id
+            it.name = name
+            it.price = price
+            it.isOnSale = onSale
+        }
 
     class ProductValidationInfo(product: Product) {
         val name: String = product.name

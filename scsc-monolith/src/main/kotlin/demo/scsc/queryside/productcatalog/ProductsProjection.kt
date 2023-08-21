@@ -5,8 +5,8 @@ import demo.scsc.api.productCatalog.ProductListQuery
 import demo.scsc.api.productCatalog.ProductListQueryResponse
 import demo.scsc.api.productCatalog.ProductListQueryResponse.ProductInfo
 import demo.scsc.api.productCatalog.ProductUpdateReceivedEvent
-import demo.scsc.queryside.answer
-import demo.scsc.queryside.tx
+import demo.scsc.util.answer
+import demo.scsc.util.tx
 import org.axonframework.config.ProcessingGroup
 import org.axonframework.eventhandling.EventHandler
 import org.axonframework.queryhandling.QueryHandler
@@ -15,13 +15,9 @@ import org.axonframework.queryhandling.QueryHandler
 class ProductsProjection {
     @EventHandler
     fun on(productUpdateReceivedEvent: ProductUpdateReceivedEvent) {
-        tx {
-            if (productUpdateReceivedEvent.onSale) {
-                it.merge(productUpdateReceivedEvent.toEntity())
-            } else {
-                val productEntity = it.find(ProductEntity::class.java, productUpdateReceivedEvent.id)
-                if (productEntity != null) it.remove(productEntity)
-            }
+        tx { em ->
+            if (productUpdateReceivedEvent.onSale) em.merge(productUpdateReceivedEvent.toEntity()) else
+                em.find(ProductEntity::class.java, productUpdateReceivedEvent.id)?.let { em.remove(it) }
         }
     }
 

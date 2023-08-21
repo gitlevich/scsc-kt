@@ -6,22 +6,17 @@ import one.microstream.storage.types.StorageManager
 import java.util.*
 
 class CartStore {
-    private val storageManager: StorageManager
-
-    init {
-        storageManager = forLocation("carts")!!
-    }
+    private val storageManager: StorageManager = forLocation("carts")!!
 
     fun saveCart(owner: String, cartId: UUID) {
         val cartsRoot = getCartsRoot(true)
-        cartsRoot!!.byUser[owner] = cartId
+        cartsRoot.byUser[owner] = cartId
         cartsRoot.byId[cartId] = GetCartQuery.Response(cartId, LinkedList())
         storageManager.store(cartsRoot.byUser)
         storageManager.store(cartsRoot.byId)
     }
 
     fun saveProduct(cartId: UUID, productId: UUID) {
-        val cartsRoot = cartsRoot ?: throw IllegalStateException("No cart storage")
         val getCartQueryResponse = cartsRoot.byId[cartId]
             ?: throw IllegalStateException("No cart with id $cartId")
 
@@ -31,43 +26,35 @@ class CartStore {
     }
 
     fun removeProduct(cartId: UUID, productId: UUID?) {
-        val cartsRoot = cartsRoot ?: throw IllegalStateException("No cart storage")
         val (_, products) = cartsRoot.byId[cartId]
             ?: throw IllegalStateException("No cart with id $cartId")
         storageManager.store(products - productId)
     }
 
     fun getOwnersCarts(owner: String): GetCartQuery.Response? {
-        var response: GetCartQuery.Response? = null
         val cartsRoot = cartsRoot
-        if (cartsRoot != null) {
-            val cartId = cartsRoot.byUser[owner]
-            if (cartId != null) {
-                response = cartsRoot.byId[cartId]
-            }
-        }
-        return response
+        val cartId = cartsRoot.byUser[owner]
+        return cartId?.let { cartsRoot.byId[it] }
     }
 
     fun removeCart(cartId: UUID) {
-        val cartsRoot = cartsRoot
-        cartsRoot!!.byId.remove(cartId)
+        cartsRoot.byId.remove(cartId)
         cartsRoot.byUser.entries.removeIf { (_, value): Map.Entry<String, UUID> -> value == cartId }
         storageManager.store(cartsRoot.byUser)
         storageManager.store(cartsRoot.byId)
     }
 
     fun reset() {
-        storageManager!!.setRoot(CartsRoot())
+        storageManager.setRoot(CartsRoot())
         storageManager.storeRoot()
     }
 
-    private val cartsRoot: CartsRoot?
-        private get() = getCartsRoot(false)
+    private val cartsRoot: CartsRoot
+        get() = getCartsRoot(false)
 
-    private fun getCartsRoot(create: Boolean): CartsRoot? {
-        var cartsRoot = storageManager!!.root() as CartsRoot
-        if (cartsRoot == null && create) {
+    private fun getCartsRoot(create: Boolean): CartsRoot {
+        var cartsRoot = storageManager.root() as CartsRoot
+        if (create) {
             cartsRoot = CartsRoot()
             storageManager.setRoot(cartsRoot)
             storageManager.storeRoot()

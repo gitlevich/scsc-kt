@@ -31,6 +31,7 @@ class AxonFramework private constructor(private val applicationName: String) {
 
     fun startAndWait() {
         configuration = start()
+        // VG switch to coroutines
         try {
             synchronized(LOCK) {
                 (LOCK as Object).wait()
