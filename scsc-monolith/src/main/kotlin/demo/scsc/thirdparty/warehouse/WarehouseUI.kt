@@ -33,15 +33,15 @@ class WarehouseUI(private val axonFramework: Configuration, private val inventor
         val updateButton = JButton("Mark as ready")
         updateButton.addActionListener { action: ActionEvent? ->
             for (selectedRow in productTable.selectedRows) {
-                axonFramework.commandGateway().send<AddProductToPackageCommand?, Any>(
+                axonFramework.commandGateway().send<AddProductToPackageCommand, Any>(
                     AddProductToPackageCommand(
                         (shippingTableModel.getValueAt(selectedRow, 0) as UUID),
                         (shippingTableModel.getValueAt(
                             selectedRow,
                             1
-                        ) as UUID) //                                    UUID.randomUUID()
+                        ) as UUID)
                     )
-                ) { command: CommandMessage<out AddProductToPackageCommand?>?, response: CommandResultMessage<*> ->
+                ) { command: CommandMessage<out AddProductToPackageCommand>, response: CommandResultMessage<*> ->
                     if (response.isExceptional) {
                         JOptionPane.showMessageDialog(
                             this,

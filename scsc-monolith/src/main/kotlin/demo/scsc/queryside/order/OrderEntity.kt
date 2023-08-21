@@ -5,25 +5,25 @@ import java.util.*
 
 @Entity
 @Table(name = "Orders")
-class OrderEntity {
+data class OrderEntity (
     @Id
     @Column(name = "id", nullable = false)
-    var id: UUID? = null
+    val id: UUID,
 
     @Column
-    var owner: String? = null
+    val owner: String,
 
     @Column
-    var isPaid = false
+    val isPaid: Boolean = false,
 
     @Column
-    var isPrepared = false
+    val isPrepared: Boolean = false,
 
     @Column
-    var isReady = false
+    val isReady: Boolean = false,
 
     @ElementCollection
     @CollectionTable(name = "order_items", joinColumns = [JoinColumn(name = "orderId")])
     @Column(name = "id")
-    var items: List<OrderEntityItem> = emptyList()
-}
+    val items: List<OrderEntityItem> = listOf()
+)

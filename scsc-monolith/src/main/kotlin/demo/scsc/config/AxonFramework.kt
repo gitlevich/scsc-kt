@@ -1,5 +1,7 @@
 package demo.scsc.config
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.typesafe.config.Config
 import org.axonframework.config.*
 import org.axonframework.eventhandling.tokenstore.jpa.JpaTokenStore
@@ -59,7 +61,7 @@ class AxonFramework private constructor(private val applicationName: String) {
     }
 
     fun withJsonSerializer(): AxonFramework {
-        val jacksonSerializer = JacksonSerializer.defaultSerializer()
+        val jacksonSerializer = JacksonSerializer.builder().objectMapper(jacksonObjectMapper()).build()
         configurer
             .configureSerializer { jacksonSerializer }
             .configureMessageSerializer { jacksonSerializer }

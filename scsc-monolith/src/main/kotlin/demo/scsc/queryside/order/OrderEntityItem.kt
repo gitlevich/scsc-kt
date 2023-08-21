@@ -6,9 +6,9 @@ import java.util.*
 
 @Embeddable
 data class OrderEntityItem(
-    var id: UUID? = null,
-    var name: String? = null,
-    var price: BigDecimal? = null
+    val id: UUID,
+    val name: String,
+    val price: BigDecimal
 )
 
 

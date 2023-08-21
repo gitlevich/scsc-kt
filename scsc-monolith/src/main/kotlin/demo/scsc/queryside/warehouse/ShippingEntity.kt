@@ -5,16 +5,16 @@ import java.util.*
 
 @Entity
 @Table(name = "shipping")
-class ShippingEntity {
+data class ShippingEntity(
     @Id
     @Column(name = "id", nullable = false)
-    var id: UUID? = null
+    val id: UUID,
 
     @Column
-    var recipient: String? = null
+    val recipient: String,
 
     @ElementCollection
     @CollectionTable(name = "shipping_items", joinColumns = [JoinColumn(name = "shippingId")])
     @Column(name = "id")
-    var items: List<ShippingEntityItem> = LinkedList()
-}
+    val items: List<ShippingEntityItem> = listOf()
+)

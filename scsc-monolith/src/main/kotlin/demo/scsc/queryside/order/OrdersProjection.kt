@@ -33,8 +33,7 @@ class OrdersProjection {
     fun on(orderFullyPaidEvent: OrderFullyPaidEvent) {
         tx {
             val orderEntity = it.find(OrderEntity::class.java, orderFullyPaidEvent.orderId)
-            orderEntity.isPaid = true
-            it.merge(orderEntity)
+            it.merge(orderEntity.copy(isPaid = true))
         }
     }
 
@@ -42,8 +41,7 @@ class OrdersProjection {
     fun on(packageReadyEvent: PackageReadyEvent) {
         tx {
             val orderEntity = it.find(OrderEntity::class.java, packageReadyEvent.orderId)
-            orderEntity.isPrepared = true
-            it.merge(orderEntity)
+            it.merge(orderEntity.copy(isPrepared = true))
         }
     }
 
@@ -51,8 +49,7 @@ class OrdersProjection {
     fun on(orderCompletedEvent: OrderCompletedEvent) {
         tx {
             val orderEntity = it.find(OrderEntity::class.java, orderCompletedEvent.orderId)
-            orderEntity.isReady = true
-            it.merge(orderEntity)
+            it.merge(orderEntity.copy(isReady = true))
         }
     }
 
@@ -70,12 +67,12 @@ class OrdersProjection {
                         .reduce(BigDecimal.ZERO) { obj: BigDecimal?, augend: BigDecimal? -> obj?.add(augend) }
                         ?.let { price ->
                             GetOrdersQueryResponse.Order(
-                                id = orderEntity.id!!,
+                                id = orderEntity.id,
                                 total = price,
                                 lines = orderEntity.items.stream()
-                                    .map { (_, name, price): OrderEntityItem -> OrderLine(name!!, price!!) }
+                                    .map { (_, name, price): OrderEntityItem -> OrderLine(name, price) }
                                     .collect(Collectors.toList()),
-                                owner = orderEntity.owner!!,
+                                owner = orderEntity.owner,
                                 isPaid = orderEntity.isPaid,
                                 isPrepared = orderEntity.isPrepared,
                                 isShipped = orderEntity.isReady
@@ -93,20 +90,13 @@ class OrdersProjection {
         tx { it.createQuery("DELETE FROM OrderEntity").executeUpdate() }
     }
 
-    private fun toEntity(orderCreatedEvent: OrderCreatedEvent): OrderEntity {
-        val orderEntity = OrderEntity()
-        orderEntity.id = orderCreatedEvent.orderId
-        orderEntity.owner = orderCreatedEvent.owner
-        val items: List<OrderEntityItem> = orderCreatedEvent.items.stream().map { item ->
-            val entity = OrderEntityItem()
-            entity.id = item.id
-            entity.name = item.name
-            entity.price = item.price
-            entity
-        }.collect(Collectors.toList())
-        orderEntity.items = items
-        return orderEntity
-    }
+    private fun toEntity(orderCreatedEvent: OrderCreatedEvent) = OrderEntity(
+        orderCreatedEvent.orderId,
+        orderCreatedEvent.owner,
+        items = orderCreatedEvent.items.map { item ->
+            OrderEntityItem(item.id, item.name, price = item.price)
+        }
+    )
 
     @MessageHandlerInterceptor(messageType = EventMessage::class)
     fun intercept(message: EventMessage<*>, interceptorChain: InterceptorChain) {

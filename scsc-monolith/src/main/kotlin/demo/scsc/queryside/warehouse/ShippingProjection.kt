@@ -69,7 +69,7 @@ class ShippingProjection {
         queryUpdateEmitter: QueryUpdateEmitter
     ) {
         queryUpdateEmitter.emit(
-            { subscriptionQueryMessage: SubscriptionQueryMessage<*, *, ShippingItem?> -> GET_SHIPPING_REQUESTS == subscriptionQueryMessage.queryName },
+            { subscriptionQueryMessage: SubscriptionQueryMessage<*, *, ShippingItem> -> GET_SHIPPING_REQUESTS == subscriptionQueryMessage.queryName },
             ShippingItem(
                 shipmentId,
                 productId,
@@ -78,30 +78,29 @@ class ShippingProjection {
         )
     }
 
-    @get:QueryHandler(queryName = GET_SHIPPING_REQUESTS)
-    val shippingRequests: GetShippingQueryResponse
-        get() {
-            val em = forName("SCSC")!!.newEntityManager
-            val shippingEntities = em
-                .createQuery(
-                    "SELECT s FROM ShippingProductEntity AS s ORDER BY s.id.shippingId",
-                    ShippingProductEntity::class.java
-                )
-                .resultList
-            val response = GetShippingQueryResponse(
-                shippingEntities.stream()
-                    .map { shippingProductEntity: ShippingProductEntity ->
-                        ShippingItem(
-                            shippingProductEntity.id!!.shippingId,
-                            shippingProductEntity.id!!.productId,
-                            false
-                        )
-                    }
-                    .collect(Collectors.toList())
+    @QueryHandler(queryName = GET_SHIPPING_REQUESTS)
+    fun shippingRequests(): GetShippingQueryResponse {
+        val em = forName("SCSC")!!.newEntityManager
+        val shippingEntities = em
+            .createQuery(
+                "SELECT s FROM ShippingProductEntity AS s ORDER BY s.id.shippingId",
+                ShippingProductEntity::class.java
             )
-            em.close()
-            return response
-        }
+            .resultList
+        val response = GetShippingQueryResponse(
+            shippingEntities.stream()
+                .map { shippingProductEntity: ShippingProductEntity ->
+                    ShippingItem(
+                        shippingProductEntity.id!!.shippingId,
+                        shippingProductEntity.id!!.productId,
+                        false
+                    )
+                }
+                .collect(Collectors.toList())
+        )
+        em.close()
+        return response
+    }
 
     @ResetHandler
     fun onReset() {

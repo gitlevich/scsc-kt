@@ -2,6 +2,8 @@ package demo.scsc.thirdparty.inventory
 
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.KotlinModule
+import com.fasterxml.jackson.module.kotlin.readValue
 import com.typesafe.config.ConfigFactory
 import demo.scsc.config.AxonFramework.Companion.configure
 import org.axonframework.config.Configuration
@@ -23,12 +25,11 @@ class InventorySystem {
 
     private fun initializeInventory(): MutableList<InventoryProduct> {
         val inventoryProducts: MutableList<InventoryProduct>
-        val objectMapper = ObjectMapper()
+        val objectMapper = ObjectMapper().registerModule(KotlinModule.Builder().build())
         val jsonInput = InventorySystem::class.java.getClassLoader().getResourceAsStream("products.json")
+            ?: throw IllegalStateException("Can't find products.json")
         try {
-            inventoryProducts = objectMapper.readValue(
-                jsonInput,
-                object : TypeReference<MutableList<InventoryProduct>>() {})
+            inventoryProducts = objectMapper.readValue(jsonInput)
         } catch (e: IOException) {
             throw IllegalStateException("Can't create External Product System", e)
         }
@@ -37,11 +38,8 @@ class InventorySystem {
             inventoryProduct.copy(onSale = true)
         }.toMutableList()
     }
+}
 
-    companion object {
-        @JvmStatic
-        fun main(args: Array<String>) {
-            InventorySystem()
-        }
-    }
+fun main() {
+    InventorySystem()
 }

@@ -6,6 +6,23 @@ plugins {
     id("org.jetbrains.kotlin.plugin.jpa") version kotlinGradlePluginVersion
 }
 
+noArg {
+    invokeInitializers = true
+}
+allOpen {
+    annotations(
+        "jakarta.persistence.Entity",
+        "jakarta.persistence.Embeddable",
+        "org.axonframework.modelling.command.AggregateRoot"
+    )
+}
+noArg {
+    annotations(
+        "jakarta.persistence.Entity",
+        "jakarta.persistence.Embeddable"
+    )
+}
+
 group = "io.axoniq.demo.scsc"
 version = "0.0.1-SNAPSHOT"
 
@@ -56,6 +73,7 @@ dependencies {
 
     implementation("io.netty:netty-resolver-dns-native-macos:4.1.96.Final")
     implementation("com.typesafe:config:1.4.2")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.15.2")
 
     // ArchUnit
     implementation("com.tngtech.archunit:archunit-junit5:1.0.1")

@@ -38,11 +38,8 @@ class WarehouseSystem {
             throw IllegalStateException("Can't create External Warehouse System", e)
         }
     }
+}
 
-    companion object {
-        @JvmStatic
-        fun main(args: Array<String>) {
-            WarehouseSystem()
-        }
-    }
+fun main() {
+    WarehouseSystem()
 }
