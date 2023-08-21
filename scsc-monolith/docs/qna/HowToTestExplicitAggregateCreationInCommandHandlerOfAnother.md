@@ -65,11 +65,9 @@ cart
        productUpdateReceivedEvent
     )
 ```
-but this surely doesn't do anything because I doubt anything in my test is configured to spin up any event
-listeners. 
+but this surely doesn't do anything: nothing in my test is set up to spin up any event listeners. 
 
-
-And, if I magically believed that something would spin up that processing group, and publish the event prior to everything:
+Also, if I were to believe that something magically does, and publish the event prior to everything:
 ```Kotlin
 @Test
 fun `should publish CartCheckedOutEvent on CheckOutCartCommand`() {
@@ -86,7 +84,7 @@ fun `should publish CartCheckedOutEvent on CheckOutCartCommand`() {
         .expectEvents(cartCheckedOutEvent)
 }
 ```
-I get this:
+I get this, expectedly:
 
 ```text
 Expected                                        |  Actual
@@ -96,18 +94,18 @@ demo.scsc.api.shoppingCart$CartCheckedOutEvent <|>
 A probable cause for the wrong chain of events is an exception that occurred while handling the command.
 org.axonframework.eventsourcing.IncompatibleAggregateException: Aggregate identifier must be non-null after applying an event. Make sure the aggregate identifier is initialized at the latest when handling the creation event.
 ```
-because Cart is not yet initialized while I am asking the fixture to process events.
+The Cart is not yet initialized while I am asking the fixture to process events (right?).
 
 
-Hence these questions:
+Hence, these questions:
 
 - is creating aggregates from another aggregate's command handler when we explicitly separated the contexts
-    of the two aggregates a good design choice? Would a command be preferable?
-- If this is a legit way to instantiate aggregates, how would one test this?
+    of the two aggregates a good design choice? Would an event/policy/command sequence be preferable?
+- If this is a legit way to instantiate aggregates, how would one test that Cart created Order? By sending it commands?
 
 My opinion:
 - not a good design choice, use a policy responding to CartCheckedOutEvent event to send the new `CreateOrderCommand`
-- test it with command
-- Figure out an alternative to `ProductValidation`, e.g., make it a service injected in the aggregate, like `ProductValidationService`, 
+- test Order with command
+- figure out an alternative to `ProductValidation`, e.g., make it a service injected in the aggregate, like `ProductValidationService`, 
      responsible for answering the question "is this product valid?"
-- Have a separate event handler to project the `ProductUpdateReceivedEvent` in the Order context
+- Have a separate event handler to project the `ProductUpdateReceivedEvent` in the Order context so the service could answer its question. Maybe even on the service itself (weird?)
