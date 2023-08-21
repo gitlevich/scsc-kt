@@ -9,17 +9,17 @@ import java.util.*
 
 @Entity
 @Table(name = "product")
-class Product {
+data class Product(
     @Id
     @Column(name = "id", nullable = false)
-    lateinit var id: UUID
+    val id: UUID,
 
     @Column
-    lateinit var name: String
+    val name: String,
 
     @Column
-    lateinit var price: BigDecimal
+    val price: BigDecimal,
 
     @Column
-    var isOnSale = false
-}
+    var isOnSale: Boolean = false
+)

@@ -31,14 +31,14 @@ class Shipment() {
     private lateinit var packageContent: PackageContent
 
     @CommandHandler
-    constructor(requestShipmentCommand: RequestShipmentCommand) : this() {
+    constructor(command: RequestShipmentCommand) : this() {
         applyEvent(
             ShipmentRequestedEvent(
-                requestShipmentCommand.shipmentId,
-                requestShipmentCommand.recipient,
-                requestShipmentCommand.products
+                command.shipmentId,
+                command.recipient,
+                command.products
             ),
-            MetaData.with("orderId", requestShipmentCommand.orderId)
+            MetaData.with("orderId", command.orderId)
         )
     }
 

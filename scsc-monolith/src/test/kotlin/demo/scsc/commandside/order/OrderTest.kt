@@ -23,7 +23,7 @@ class OrderTest {
     companion object {
         private val orderId = UUID.randomUUID()
 
-        private val orderCreatedEvent = order.OrderCreatedEvent(
+        internal val orderCreatedEvent = order.OrderCreatedEvent(
             orderId = orderId,
             owner = "owner",
             items = listOf(

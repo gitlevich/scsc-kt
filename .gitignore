@@ -1,3 +1,17 @@
+scsc-monolith/target/
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
 ### IntelliJ IDEA ###
 .idea
 *.iws
@@ -17,9 +31,11 @@ build/
 ### VS Code ###
 .vscode/
 
-### Mac OS ###
-.DS_Store
+**/**/.env
 
-### custom ###
-work
-AxonSynapse
+out
+out/**/**
+
+**/.gradle/**/*
+.fastRequest/**
+

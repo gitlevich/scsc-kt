@@ -63,7 +63,7 @@ class OrderPayment() {
     }
 
     @EventSourcingHandler
-    fun on(orderFullyPaidEvent: payment.OrderFullyPaidEvent) {
+    fun on(event: payment.OrderFullyPaidEvent) {
         markDeleted()
     }
 

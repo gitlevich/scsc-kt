@@ -26,19 +26,22 @@ import java.util.*
 class Cart() {
     @AggregateIdentifier
     lateinit var id: UUID
-    private lateinit var owner: String
-    private val products: MutableList<UUID> = mutableListOf()
+    internal lateinit var owner: String
+    internal val products: MutableList<UUID> = mutableListOf()
 
     @CommandHandler
     @CreationPolicy(AggregateCreationPolicy.CREATE_IF_MISSING)
-    fun handle(command: shoppingCart.AddProductToCartCommand, deadlineManager: DeadlineManager): UUID {
-
-        applyEvent(shoppingCart.CartCreatedEvent(UUID.randomUUID(), command.owner))
+    fun handle(
+        command: shoppingCart.AddProductToCartCommand,
+        deadlineManager: DeadlineManager,
+        nextUuid: () -> UUID = { UUID.randomUUID() }
+    ): UUID {
+        applyEvent(shoppingCart.CartCreatedEvent(nextUuid(), command.owner))
         if (products.contains(command.productId))
             throw CommandExecutionException("Product already in the cart! ", null)
 
         applyEvent(shoppingCart.ProductAddedToCartEvent(id, command.productId))
-        deadlineManager.schedule(Duration.ofMinutes(10), ABANDON_CART)
+        deadlineManager.schedule(abandonCartAfter, ABANDON_CART)
         return id
     }
 
@@ -104,7 +107,8 @@ class Cart() {
     }
 
     companion object {
-        private const val ABANDON_CART = "abandon-cart"
+        internal const val ABANDON_CART: String = "abandon-cart"
+        internal val abandonCartAfter = Duration.ofMinutes(10)
         private val LOG = LoggerFactory.getLogger(Cart::class.java)
     }
 }
