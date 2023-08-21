@@ -2,6 +2,7 @@ package demo.scsc.commandside.shoppingcart
 
 import demo.scsc.api.shoppingCart
 import demo.scsc.commandside.order.Order
+import demo.scsc.queryside.attemptTo
 import org.axonframework.commandhandling.CommandExecutionException
 import org.axonframework.commandhandling.CommandHandler
 import org.axonframework.commandhandling.CommandMessage
@@ -24,99 +25,81 @@ import java.util.*
 @AggregateRoot
 class Cart() {
     @AggregateIdentifier
-    var id: UUID? = null
-    private var owner: String? = null
-    private val products: MutableSet<UUID> = mutableSetOf()
+    lateinit var id: UUID
+    private lateinit var owner: String
+    private val products: MutableList<UUID> = mutableListOf()
 
     @CommandHandler
     @CreationPolicy(AggregateCreationPolicy.CREATE_IF_MISSING)
     fun handle(command: shoppingCart.AddProductToCartCommand, deadlineManager: DeadlineManager): UUID {
 
-        if (id == null) applyEvent(shoppingCart.CartCreatedEvent(UUID.randomUUID(), command.owner))
+        applyEvent(shoppingCart.CartCreatedEvent(UUID.randomUUID(), command.owner))
         if (products.contains(command.productId))
             throw CommandExecutionException("Product already in the cart! ", null)
 
-        applyEvent(shoppingCart.ProductAddedToCartEvent(id!!, command.productId))
+        applyEvent(shoppingCart.ProductAddedToCartEvent(id, command.productId))
         deadlineManager.schedule(Duration.ofMinutes(10), ABANDON_CART)
-        return id!!
+        return id
     }
 
     @CommandHandler
     fun handle(command: shoppingCart.RemoveProductFromCartCommand) {
-
         if (!products.contains(command.productId)) throw CommandExecutionException("Product not in the cart! ", null)
 
-        applyEvent(shoppingCart.ProductRemovedFromCartEvent(id!!, command.productId))
+        applyEvent(shoppingCart.ProductRemovedFromCartEvent(id, command.productId))
     }
 
     @CommandHandler
     fun handle(command: shoppingCart.AbandonCartCommand) {
-
         applyEvent(shoppingCart.CartAbandonedEvent(command.cartId, shoppingCart.CartAbandonedEvent.Reason.MANUAL))
     }
 
     @CommandHandler
     fun handle(command: shoppingCart.CheckOutCartCommand) {
-
-        try {
-            createNew(Order::class.java) { Order(products.stream().toList(), owner!!) }
-        } catch (e: Exception) {
-            e.printStackTrace()
-            throw CommandExecutionException(e.message, e)
-        }
+        attemptTo { createNew(Order::class.java) { Order(products, owner) } }
         applyEvent(shoppingCart.CartCheckedOutEvent(command.cartId))
     }
 
     @DeadlineHandler(deadlineName = ABANDON_CART)
     fun onDeadline() {
-        applyEvent(shoppingCart.CartAbandonedEvent(id!!, shoppingCart.CartAbandonedEvent.Reason.TIMEOUT))
+        applyEvent(shoppingCart.CartAbandonedEvent(id, shoppingCart.CartAbandonedEvent.Reason.TIMEOUT))
     }
 
     @EventSourcingHandler
-    fun on(cartCreatedEvent: shoppingCart.CartCreatedEvent) {
-        id = cartCreatedEvent.id
-        owner = cartCreatedEvent.owner
+    fun on(event: shoppingCart.CartCreatedEvent) {
+        id = event.id
+        owner = event.owner
     }
 
     @EventSourcingHandler
-    fun on(productAddedToCartEvent: shoppingCart.ProductAddedToCartEvent) {
-        products.add(productAddedToCartEvent.productId)
+    fun on(event: shoppingCart.ProductAddedToCartEvent) {
+        products.add(event.productId)
     }
 
     @EventSourcingHandler
-    fun on(productRemovedFromCartEvent: shoppingCart.ProductRemovedFromCartEvent) {
-        products.remove(productRemovedFromCartEvent.productId)
+    fun on(event: shoppingCart.ProductRemovedFromCartEvent) {
+        products.remove(event.productId)
     }
 
     @EventSourcingHandler
-    fun on(cartAbandonedEvent: shoppingCart.CartAbandonedEvent) {
+    fun on(event: shoppingCart.CartAbandonedEvent) {
         markDeleted()
     }
 
     @EventSourcingHandler
-    fun on(cartCheckedOutEvent: shoppingCart.CartCheckedOutEvent) {
+    fun on(event: shoppingCart.CartCheckedOutEvent) {
         markDeleted()
     }
 
     @MessageHandlerInterceptor(messageType = CommandMessage::class)
-    fun intercept(
-        message: CommandMessage<*>,
-        interceptorChain: InterceptorChain
-    ) {
-        LOG.info("[  COMMAND ] " + message.payload.toString())
+    fun intercept(message: CommandMessage<*>, interceptorChain: InterceptorChain) {
+        LOG.info("[  COMMAND ] ${message.payload}")
         interceptorChain.proceed()
     }
 
     @MessageHandlerInterceptor(messageType = EventMessage::class)
-    fun intercept(
-        message: EventMessage<*>,
-        interceptorChain: InterceptorChain
-    ) {
-        if (isLive()) {
-            LOG.info("[    EVENT ] " + message.payload.toString())
-        } else {
-            LOG.info("[ SOURCING ] " + message.payload.toString())
-        }
+    fun intercept(message: EventMessage<*>, interceptorChain: InterceptorChain) {
+        if (isLive()) LOG.info("[    EVENT ] ${message.payload}") else LOG.info("[ SOURCING ] ${message.payload}")
         interceptorChain.proceed()
     }
 
