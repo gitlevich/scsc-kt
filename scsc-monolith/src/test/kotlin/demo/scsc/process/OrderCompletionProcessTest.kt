@@ -16,19 +16,35 @@ class OrderCompletionProcessTest {
 
     @BeforeEach
     fun setUp() {
-        val ids = listOf(orderPaymentId, shipmentId).iterator()
         val nextUuid: () -> UUID = mockk<() -> UUID>(relaxed = true).also {
-            every { it.invoke() } returns ids.next() andThen ids.next()
+            // Note: order is significant and must match the order in which nextId() is called in the saga
+            with(listOf(orderPaymentId, shipmentId).iterator()) {
+                every { it.invoke() } returns next() andThen next()
+            }
         }
         process.registerResource(nextUuid)
     }
 
+
     @Test
-    fun `should start saga on order created event`() {
+    fun `should start saga on OrderCreatedEvent`() {
         process.givenNoPriorActivity()
             .whenPublishingA(orderCreatedEvent)
             .expectActiveSagas(1)
-            .expectAssociationWith("orderId", orderCreatedEvent.orderId.toString())
+    }
+
+    @Test
+    fun `should associate saga with order id and shipment id on OrderCreatedEvent`() {
+        process.givenNoPriorActivity()
+            .whenPublishingA(orderCreatedEvent)
+            .expectAssociationWith("orderId", orderId.toString())
+            .expectAssociationWith("shipmentId", shipmentId.toString())
+    }
+
+    @Test
+    fun `should dispatch commands on OrderCreatedEvent`() {
+        process.givenNoPriorActivity()
+            .whenPublishingA(orderCreatedEvent)
             .expectDispatchedCommands(
                 requestPaymentCommand,
                 requestShipmentCommand
@@ -44,7 +60,7 @@ class OrderCompletionProcessTest {
                 order.OrderCreatedEvent.OrderItem(
                     id = UUID.randomUUID(),
                     name = "Test Item",
-                    price = BigDecimal.TEN
+                    price = BigDecimal("9.99")
                 )
             )
         )
