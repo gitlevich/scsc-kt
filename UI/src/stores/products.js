@@ -16,12 +16,12 @@ export const useProductsStore = defineStore('products', {
             queryGateway.post(
                 "",
                 {
-                    "name": "demo.scsc.api.productcatalog.ProductListQuery",
+                    "name": "demo.scsc.api.productCatalog.ProductListQuery",
                     "payload": {
                         "sortBy": this.sortBy,
                     },
-                    "payloadType": "demo.scsc.api.productcatalog.ProductListQuery",
-                    "responseType": "demo.scsc.api.productcatalog.ProductListQueryResponse",
+                    "payloadType": "demo.scsc.api.productCatalog.ProductListQuery",
+                    "responseType": "demo.scsc.api.productCatalog.ProductListQueryResponse",
                 },
             )
                 .then((response) => {

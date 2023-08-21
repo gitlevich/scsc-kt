@@ -17,8 +17,8 @@ export const useCartStore = defineStore('carts', () => {
                 "payload": {
                     "owner": owner
                 },
-                "payloadType": "demo.scsc.api.shoppingcart.GetCartQuery",
-                "responseType": "demo.scsc.api.shoppingcart.GetCartQueryResponse",
+                "payloadType": "demo.scsc.api.shoppingCart.GetCartQuery",
+                "responseType": "demo.scsc.api.shoppingCart.GetCartQueryResponse",
             },
         )
             .then((response) => {
