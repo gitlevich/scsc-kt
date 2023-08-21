@@ -9,8 +9,9 @@ import java.math.BigDecimal
 import java.util.*
 
 /**
- * What is this thing? Order construct it. Also, it seems to be a free-floating
- * event handler... Confusing, and makes Cart testing hard.
+ * What is this thing? Order instantiates it. Also, it seems to be a free-floating event handler... Confusing, and
+ * makes Cart testing hard.
+ *
  * VG refactor this away, see [docs/qna/HowToTestExplicitAggregateCreationInCommandHandlerOfAnother.md]
  */
 @ProcessingGroup(Constants.PROCESSING_GROUP_PRODUCT)
