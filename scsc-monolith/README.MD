@@ -22,4 +22,6 @@ Next steps:
 - refactor it to a more idiomatic Kotlin
 - see how query side looks with Kotlin frameworks like Ktor, Exposed, etc. 
 - see how it all looks with coroutines
+- draw context map with respective aggregate roots, etc. 
+- add "narratives", that is reference scenarios told as command/event or policy/command sequences 
 - ???
