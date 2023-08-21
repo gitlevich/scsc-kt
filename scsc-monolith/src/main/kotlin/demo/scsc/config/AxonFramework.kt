@@ -2,7 +2,8 @@ package demo.scsc.config
 
 import org.axonframework.config.*
 import org.axonframework.eventhandling.tokenstore.jpa.JpaTokenStore
-import org.axonframework.messaging.annotation.ParameterResolver
+import org.axonframework.messaging.annotation.ClasspathParameterResolverFactory
+import org.axonframework.messaging.annotation.MultiParameterResolverFactory
 import org.axonframework.messaging.annotation.ParameterResolverFactory
 import org.axonframework.modelling.saga.repository.jpa.JpaSagaStore
 import org.axonframework.serialization.json.JacksonSerializer
@@ -22,9 +23,14 @@ class AxonFramework private constructor(private val applicationName: String) {
         return configuration
     }
 
-    fun withParameterResolvers(resolvers: List<ParameterResolverFactory>): AxonFramework {
-        resolvers.forEach { resolver ->
-            configurer.registerComponent(ParameterResolver::class.java) { resolver as ParameterResolver<*> }
+    fun withParameterResolvers(parameterResolverFactories: List<ParameterResolverFactory>): AxonFramework {
+        configurer.registerComponent(ParameterResolverFactory::class.java) {
+            MultiParameterResolverFactory(
+                listOf(
+                    ClasspathParameterResolverFactory.forClass(this::class.java),
+                    ConfigurationParameterResolverFactory(configuration)
+                ) + parameterResolverFactories
+            )
         }
         return this
     }
