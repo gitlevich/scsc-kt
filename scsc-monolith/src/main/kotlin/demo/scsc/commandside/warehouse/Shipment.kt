@@ -52,7 +52,7 @@ class Shipment() {
     @EventSourcingHandler
     fun on(event: ShipmentRequestedEvent, metaData: MetaData) {
         shipmentId = event.shipmentId
-        packageContent = PackageContent((metaData["orderId"] as UUID?)!!, event.products)
+        packageContent = PackageContent((metaData["orderId"] as UUID), event.products)
     }
 
     @EventSourcingHandler
