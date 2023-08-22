@@ -21,5 +21,5 @@ data class Product(
     val price: BigDecimal,
 
     @Column
-    var isOnSale: Boolean = false
+    val isOnSale: Boolean
 )

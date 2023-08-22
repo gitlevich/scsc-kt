@@ -1,8 +1,3 @@
-I think of the original version of this project as a reference implementation, hence design questions. If 
-the project's goal is only to demo how to use AF without Spring, please ignore them.  
-
-#### ShoppingCart creates Order aggregate in its checkout command handler, using Order's constructor
-
 ```Kotlin
 @CommandHandler
 fun handle(command: shoppingCart.CheckOutCartCommand) {
@@ -21,3 +16,6 @@ Questions:
 - it looks like the two aggregates live in different contexts. True? If so, would instantiating one from another 
   be a bit too intimate? Or not a concern? This is a tiny project, I am scaling it up in my head to potentially a 
   multi-service implementation where this would be impossible :-)
+- ProductValidation is instantiated in Order constructor, not injected. Is there a way to test it like that? I tried
+   injecting it by creating another parameter resolver factory, but then it becomes messy with having to push it through
+   Cart which really doesn't care about it, and the SCSCArchTest.kt complains. 
