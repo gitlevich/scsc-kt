@@ -19,10 +19,10 @@ import java.util.*
 
 class OrderPayment() {
     @AggregateIdentifier
-    private lateinit var orderPaymentId: UUID
-    private lateinit var orderId: UUID
-    private lateinit var requestedAmount: BigDecimal
-    private var paidAmount = BigDecimal.ZERO
+    internal lateinit var orderPaymentId: UUID
+    internal lateinit var orderId: UUID
+    internal lateinit var requestedAmount: BigDecimal
+    internal var paidAmount = BigDecimal.ZERO
 
     @CommandHandler
     constructor(command: RequestPaymentCommand) : this() {
@@ -42,7 +42,7 @@ class OrderPayment() {
     fun on(command: payment.ProcessPaymentCommand) {
         val leftToPay = requestedAmount.subtract(paidAmount)
         if (command.amount > leftToPay) {
-            throw CommandExecutionException("Can't pay more than you own", null)
+            throw CommandExecutionException("Can't pay more than you owe", null)
         }
         applyEvent(payment.PaymentReceivedEvent(orderPaymentId, command.amount))
         if (command.amount.compareTo(leftToPay) == 0) {
@@ -62,6 +62,7 @@ class OrderPayment() {
         paidAmount = paidAmount.add(event.amount)
     }
 
+    @Suppress("UNUSED_PARAMETER")
     @EventSourcingHandler
     fun on(event: payment.OrderFullyPaidEvent) {
         markDeleted()
