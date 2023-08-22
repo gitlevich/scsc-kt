@@ -22,10 +22,37 @@ constructor(itemIds: List<UUID>, owner: String): this() {
 Given it is not injected, is there a straightforward strategy to test Order?
 The only option I can think of is injection, by doing this: 
    - declare it as an constructor argument to Order constructor 
-   - create a parameter resolver for it
+   - create a parameter resolver for it:
+```kotlin
+class ProductValidationResolverFactory : ParameterResolverFactory {
+    override fun createInstance(
+        executable: Executable?,
+        parameters: Array<out Parameter>?,
+        parameterIndex: Int
+    ): ParameterResolver<*> = productValidationResolver
+
+    private val productValidationResolver = object : ParameterResolver<ProductValidation> {
+        override fun resolveParameterValue(message: Message<*>): ProductValidation = ProductValidation()
+        override fun matches(message: Message<*>): Boolean = true
+    }
+}
+```
+   - register it in the Axon configuration in SCSCApp:
+```kotlin
+withCustomParameterResolverFactories(
+            listOf(
+                UuidGenParameterResolverFactory(),
+                ProductValidationResolverFactory()
+            )
+        )
+```
    Concerns: 
    - since Cart creates the order directly, not via a command (separate concern), it becomes a dependency of Cart, which doesn't care about it and is in a different context
-   - it upsets the architecture test
+   - it upsets the architecture test: 
+```
+     Architecture Violation [Priority: MEDIUM] - Rule 'classes that reside in a package 'demo.scsc.commandside..' should only be accessed by any package ['demo.scsc.commandside..', 'demo.scsc']' was violated (1 times):
+     Method <demo.scsc.config.resolver.ProductValidationResolverFactory$productValidationResolver$1.resolveParameterValue(org.axonframework.messaging.Message)> calls constructor <demo.scsc.commandside.order.ProductValidation.<init>()> in (ProductValidationResolverFactory.kt:18)
+```
 
 Also, design questions about `ProductValidation`: how do we characterize it in DDD terms?
 - `fun forProduct(id: UUID): ProductValidationInfo?` makes it look like a domain service from the Order point of view
