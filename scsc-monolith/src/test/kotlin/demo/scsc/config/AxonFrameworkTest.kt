@@ -1,5 +1,6 @@
 package demo.scsc.config
 
+import demo.scsc.config.resolver.UuidGenParameterResolverFactory
 import org.assertj.core.api.Assertions.assertThat
 import org.axonframework.config.ConfigurationParameterResolverFactory
 import org.axonframework.messaging.annotation.MultiParameterResolverFactory

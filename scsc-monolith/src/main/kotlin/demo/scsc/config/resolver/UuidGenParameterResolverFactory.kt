@@ -1,4 +1,4 @@
-package demo.scsc.config
+package demo.scsc.config.resolver
 
 import org.axonframework.messaging.Message
 import org.axonframework.messaging.annotation.ParameterResolver

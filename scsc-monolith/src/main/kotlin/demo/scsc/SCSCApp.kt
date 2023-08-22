@@ -8,7 +8,7 @@ import demo.scsc.commandside.payment.OrderPayment
 import demo.scsc.commandside.shoppingcart.Cart
 import demo.scsc.commandside.warehouse.Shipment
 import demo.scsc.config.AxonFramework
-import demo.scsc.config.UuidGenParameterResolverFactory
+import demo.scsc.config.resolver.UuidGenParameterResolverFactory
 import demo.scsc.process.OrderCompletionProcess
 import demo.scsc.queryside.order.OrdersProjection
 import demo.scsc.queryside.payment.PaymentProjection

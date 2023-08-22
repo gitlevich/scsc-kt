@@ -2,7 +2,7 @@
 
 The snippet below instantiates what appears to be a domain service in the Order aggregate constructor:
 
-```Kotlin
+```
 constructor(itemIds: List<UUID>, owner: String): this() {
     val productValidation = ProductValidation()
     val orderItems = mutableListOf<OrderItem>()
@@ -27,3 +27,8 @@ The only option I can think of is injection, by doing this:
    - since Cart creates the order directly, not via a command (separate concern), it becomes a dependency of Cart, which doesn't care about it and is in a different context
    - it upsets the architecture test
 
+Also, design questions about `ProductValidation`: how do we characterize it in DDD terms?
+- `fun forProduct(id: UUID): ProductValidationInfo?` makes it look like a domain service from the Order point of view
+- `@EventHandler`-annotated method makes it look like a projection, creating a representation of Product from the inventory context interesting in the Order context
+
+Or should I disregard this question and just accept it as a pragmatic solution?
