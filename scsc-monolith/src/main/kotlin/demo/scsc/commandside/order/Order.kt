@@ -28,8 +28,8 @@ class Order() {
     internal val items: MutableList<OrderItem> = mutableListOf()
 
     constructor(itemIds: List<UUID>, owner: String): this() {
-        val orderItems = mutableListOf<OrderItem>()
         val productValidation = ProductValidation()
+        val orderItems = mutableListOf<OrderItem>()
         for (itemId in itemIds) {
             val info = productValidation.forProduct(itemId)
                 ?: throw IllegalStateException("No product validation available")
