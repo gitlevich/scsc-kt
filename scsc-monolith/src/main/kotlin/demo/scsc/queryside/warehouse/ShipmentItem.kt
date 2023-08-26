@@ -4,4 +4,4 @@ import jakarta.persistence.Embeddable
 import java.util.*
 
 @Embeddable
-data class ShippingEntityItem(val id: UUID)
+data class ShipmentItem(val id: UUID)

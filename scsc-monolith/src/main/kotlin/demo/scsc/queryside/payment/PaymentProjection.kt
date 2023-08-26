@@ -29,7 +29,7 @@ class PaymentProjection {
     @EventHandler
     fun on(event: PaymentReceivedEvent) {
         tx { em ->
-            em.find(PaymentEntity::class.java, event.orderPaymentId)?.let { paymentEntity ->
+            em.find(Payment::class.java, event.orderPaymentId)?.let { paymentEntity ->
                 var paid = paymentEntity.paidAmount!!
                 paid = paid.add(event.amount)
                 paymentEntity.paidAmount = paid
@@ -42,22 +42,22 @@ class PaymentProjection {
     @QueryHandler
     fun on(query: GetPaymentForOrderQuery): GetPaymentForOrderQueryResponse =
         answer(query) {
-            val paymentEntity = it
-                .createQuery("SELECT p FROM PaymentEntity p WHERE p.orderId = :orderId", PaymentEntity::class.java)
+            val payment = it
+                .createQuery("SELECT p FROM Payment p WHERE p.orderId = :orderId", Payment::class.java)
                 .setParameter("orderId", query.orderId)
                 .singleResult
 
             GetPaymentForOrderQueryResponse(
-                paymentEntity.id!!,
-                paymentEntity.orderId!!,
-                paymentEntity.requestedAmount!!,
-                paymentEntity.paidAmount!!
+                payment.id!!,
+                payment.orderId!!,
+                payment.requestedAmount!!,
+                payment.paidAmount!!
             )
         }
 
     @ResetHandler
     fun onReset(resetContext: ResetContext<*>) {
-        tx { it.createQuery("DELETE FROM PaymentEntity").executeUpdate() }
+        tx { it.createQuery("DELETE FROM Payment").executeUpdate() }
     }
 
     @MessageHandlerInterceptor(messageType = EventMessage::class)
@@ -69,7 +69,7 @@ class PaymentProjection {
     companion object {
         private val LOG = LoggerFactory.getLogger(PaymentProjection::class.java)
 
-        private fun PaymentRequestedEvent.toEntity() = PaymentEntity().apply {
+        private fun PaymentRequestedEvent.toEntity() = Payment().apply {
             id = orderPaymentId
             orderId = this@toEntity.orderId
             requestedAmount = amount

@@ -5,7 +5,7 @@ import java.util.*
 
 @Entity
 @Table(name = "Orders")
-data class OrderEntity (
+data class Order (
     @Id
     @Column(name = "id", nullable = false)
     val id: UUID,
@@ -25,5 +25,5 @@ data class OrderEntity (
     @ElementCollection
     @CollectionTable(name = "order_items", joinColumns = [JoinColumn(name = "orderId")])
     @Column(name = "id")
-    val items: List<OrderEntityItem> = listOf()
+    val items: List<OrderItem> = listOf()
 )

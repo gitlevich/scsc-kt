@@ -5,7 +5,7 @@ import java.math.BigDecimal
 import java.util.*
 
 @Embeddable
-data class OrderEntityItem(
+data class OrderItem(
     val id: UUID,
     val name: String,
     val price: BigDecimal

@@ -32,7 +32,7 @@ class OrdersProjection {
     @EventHandler
     fun on(orderFullyPaidEvent: OrderFullyPaidEvent) {
         tx {
-            val orderEntity = it.find(OrderEntity::class.java, orderFullyPaidEvent.orderId)
+            val orderEntity = it.find(Order::class.java, orderFullyPaidEvent.orderId)
             it.merge(orderEntity.copy(isPaid = true))
         }
     }
@@ -40,7 +40,7 @@ class OrdersProjection {
     @EventHandler
     fun on(packageReadyEvent: PackageReadyEvent) {
         tx {
-            val orderEntity = it.find(OrderEntity::class.java, packageReadyEvent.orderId)
+            val orderEntity = it.find(Order::class.java, packageReadyEvent.orderId)
             it.merge(orderEntity.copy(isPrepared = true))
         }
     }
@@ -48,7 +48,7 @@ class OrdersProjection {
     @EventHandler
     fun on(orderCompletedEvent: OrderCompletedEvent) {
         tx {
-            val orderEntity = it.find(OrderEntity::class.java, orderCompletedEvent.orderId)
+            val orderEntity = it.find(Order::class.java, orderCompletedEvent.orderId)
             it.merge(orderEntity.copy(isReady = true))
         }
     }
@@ -57,20 +57,20 @@ class OrdersProjection {
     fun getOrders(query: GetOrdersQuery): GetOrdersQueryResponse {
         val em = forName("SCSC")!!.newEntityManager
         val orderEntities = em
-            .createQuery("SELECT p FROM OrderEntity AS p WHERE owner = ?1", OrderEntity::class.java)
+            .createQuery("SELECT p FROM Order AS p WHERE owner = ?1", Order::class.java)
             .setParameter(1, query.owner)
             .resultList
         val response = GetOrdersQueryResponse(
             orderEntities.stream()
-                .map { orderEntity: OrderEntity ->
-                    orderEntity.items.stream().map(OrderEntityItem::price)
+                .map { orderEntity: Order ->
+                    orderEntity.items.stream().map(OrderItem::price)
                         .reduce(BigDecimal.ZERO) { obj: BigDecimal?, augend: BigDecimal? -> obj?.add(augend) }
                         ?.let { price ->
                             GetOrdersQueryResponse.Order(
                                 id = orderEntity.id,
                                 total = price,
                                 lines = orderEntity.items.stream()
-                                    .map { (_, name, price): OrderEntityItem -> OrderLine(name, price) }
+                                    .map { (_, name, price): OrderItem -> OrderLine(name, price) }
                                     .collect(Collectors.toList()),
                                 owner = orderEntity.owner,
                                 isPaid = orderEntity.isPaid,
@@ -87,14 +87,14 @@ class OrdersProjection {
 
     @ResetHandler
     fun onReset(resetContext: ResetContext<*>?) {
-        tx { it.createQuery("DELETE FROM OrderEntity").executeUpdate() }
+        tx { it.createQuery("DELETE FROM Order").executeUpdate() }
     }
 
-    private fun toEntity(orderCreatedEvent: OrderCreatedEvent) = OrderEntity(
+    private fun toEntity(orderCreatedEvent: OrderCreatedEvent) = Order(
         orderCreatedEvent.orderId,
         orderCreatedEvent.owner,
         items = orderCreatedEvent.items.map { item ->
-            OrderEntityItem(item.id, item.name, price = item.price)
+            OrderItem(item.id, item.name, price = item.price)
         }
     )
 

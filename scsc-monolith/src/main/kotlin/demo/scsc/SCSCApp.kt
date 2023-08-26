@@ -14,7 +14,7 @@ import demo.scsc.queryside.order.OrdersProjection
 import demo.scsc.queryside.payment.PaymentProjection
 import demo.scsc.queryside.productcatalog.ProductsProjection
 import demo.scsc.queryside.shoppingcart.CartsProjection
-import demo.scsc.queryside.warehouse.ShippingProjection
+import demo.scsc.queryside.warehouse.ShipmentProjection
 
 fun main() {
     val appConfig = ConfigFactory.load()
@@ -35,7 +35,7 @@ fun main() {
             OrdersProjection(),
             ProductValidation(),
             PaymentProjection(),
-            ShippingProjection()
+            ShipmentProjection()
         )
         .withCustomParameterResolverFactories(listOf(UuidGenParameterResolverFactory()))
         .connectedToInspectorAxon(appConfig.getConfig("application.axon.inspector"))

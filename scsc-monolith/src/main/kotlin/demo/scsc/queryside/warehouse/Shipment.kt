@@ -4,8 +4,8 @@ import jakarta.persistence.*
 import java.util.*
 
 @Entity
-@Table(name = "shipping")
-data class ShippingEntity(
+@Table(name = "shipment")
+data class Shipment(
     @Id
     @Column(name = "id", nullable = false)
     val id: UUID,
@@ -14,7 +14,7 @@ data class ShippingEntity(
     val recipient: String,
 
     @ElementCollection
-    @CollectionTable(name = "shipping_items", joinColumns = [JoinColumn(name = "shippingId")])
+    @CollectionTable(name = "shipment_items", joinColumns = [JoinColumn(name = "shipmentId")])
     @Column(name = "id")
-    val items: List<ShippingEntityItem> = listOf()
+    val items: List<ShipmentItem> = listOf()
 )

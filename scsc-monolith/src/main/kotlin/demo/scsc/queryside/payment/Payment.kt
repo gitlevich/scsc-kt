@@ -10,7 +10,7 @@ import java.util.*
 
 @Entity
 @Table(name = Constants.PROCESSING_GROUP_PAYMENT)
-class PaymentEntity {
+class Payment {
     @Id
     @Column(name = "id", nullable = false)
     var id: UUID? = null

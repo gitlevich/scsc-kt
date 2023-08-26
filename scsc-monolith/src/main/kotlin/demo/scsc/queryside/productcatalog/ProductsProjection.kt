@@ -17,14 +17,14 @@ class ProductsProjection {
     fun on(productUpdateReceivedEvent: ProductUpdateReceivedEvent) {
         tx { em ->
             if (productUpdateReceivedEvent.onSale) em.merge(productUpdateReceivedEvent.toEntity()) else
-                em.find(ProductEntity::class.java, productUpdateReceivedEvent.id)?.let { em.remove(it) }
+                em.find(CatalogProduct::class.java, productUpdateReceivedEvent.id)?.let { em.remove(it) }
         }
     }
 
     @QueryHandler
     fun getProducts(query: ProductListQuery) = answer(query) {
         ProductListQueryResponse(
-            it.createQuery(getProductsSql(query.sortBy), ProductEntity::class.java)
+            it.createQuery(getProductsSql(query.sortBy), CatalogProduct::class.java)
                 .resultList
                 .asSequence()
                 .map { productEntity ->
@@ -40,7 +40,7 @@ class ProductsProjection {
         )
     }
 
-    private fun ProductUpdateReceivedEvent.toEntity() = ProductEntity().also {
+    private fun ProductUpdateReceivedEvent.toEntity() = CatalogProduct().also {
         it.id = id
         it.name = name
         it.desc = desc

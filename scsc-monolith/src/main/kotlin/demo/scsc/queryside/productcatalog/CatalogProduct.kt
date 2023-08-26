@@ -9,7 +9,7 @@ import java.util.*
 
 @Entity
 @Table(name = "Products")
-class ProductEntity {
+class CatalogProduct {
     @Id
     @Column(name = "id", nullable = false)
     var id: UUID? = null
