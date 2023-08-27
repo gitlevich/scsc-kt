@@ -1,6 +1,6 @@
 package demo.scsc.queryside.shoppingcart
 
-import demo.scsc.api.shoppingCart.GetCartQuery
+import demo.scsc.api.shoppingcart.GetCartQuery
 import demo.scsc.config.microstream.MicrostreamStore.forLocation
 import one.microstream.storage.types.StorageManager
 import java.util.*

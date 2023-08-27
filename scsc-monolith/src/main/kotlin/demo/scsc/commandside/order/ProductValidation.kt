@@ -1,7 +1,7 @@
 package demo.scsc.commandside.order
 
 import demo.scsc.Constants
-import demo.scsc.api.productCatalog
+import demo.scsc.api.productcatalog
 import demo.scsc.util.tx
 import org.axonframework.config.ProcessingGroup
 import org.axonframework.eventhandling.EventHandler
@@ -12,7 +12,7 @@ import java.util.*
 class ProductValidation {
 
     @EventHandler
-    fun on(event: productCatalog.ProductUpdateReceivedEvent) {
+    fun on(event: productcatalog.ProductUpdateReceivedEvent) {
         tx { it.merge(event.toEntity()) }
     }
 
@@ -20,7 +20,7 @@ class ProductValidation {
         it.find(Product::class.java, id)?.let { product -> ProductValidationInfo(product) }
     }
 
-    private fun productCatalog.ProductUpdateReceivedEvent.toEntity() = Product(
+    private fun productcatalog.ProductUpdateReceivedEvent.toEntity() = Product(
         id = id,
         name = name,
         price = price,

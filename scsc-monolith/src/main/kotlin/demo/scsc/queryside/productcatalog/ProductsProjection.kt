@@ -1,10 +1,10 @@
 package demo.scsc.queryside.productcatalog
 
 import demo.scsc.Constants
-import demo.scsc.api.productCatalog.ProductListQuery
-import demo.scsc.api.productCatalog.ProductListQueryResponse
-import demo.scsc.api.productCatalog.ProductListQueryResponse.ProductInfo
-import demo.scsc.api.productCatalog.ProductUpdateReceivedEvent
+import demo.scsc.api.productcatalog.ProductListQuery
+import demo.scsc.api.productcatalog.ProductListQueryResponse
+import demo.scsc.api.productcatalog.ProductListQueryResponse.ProductInfo
+import demo.scsc.api.productcatalog.ProductUpdateReceivedEvent
 import demo.scsc.util.answer
 import demo.scsc.util.tx
 import org.axonframework.config.ProcessingGroup

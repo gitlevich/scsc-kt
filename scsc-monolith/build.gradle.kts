@@ -74,6 +74,7 @@ dependencies {
     implementation("io.netty:netty-resolver-dns-native-macos:4.1.96.Final")
     implementation("com.typesafe:config:1.4.2")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.15.2")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
 
     // ArchUnit
     implementation("com.tngtech.archunit:archunit-junit5:1.0.1")

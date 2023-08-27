@@ -6,7 +6,7 @@ import jakarta.persistence.Persistence
 import org.axonframework.common.jpa.EntityManagerProvider
 import org.axonframework.common.transaction.TransactionManager
 
-class JpaPersistenceUnit private constructor(persistenceUnit: String?) {
+class JpaPersistenceUnit private constructor(persistenceUnit: String) {
     private val emf: EntityManagerFactory
     private val entityManagerThreadLocal = ThreadLocal<EntityManager>()
 

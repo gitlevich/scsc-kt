@@ -1,8 +1,6 @@
 package demo.scsc.commandside.shoppingcart
 
-import demo.scsc.api.shoppingCart
-import demo.scsc.commandside.order.Order
-import demo.scsc.util.attemptTo
+import demo.scsc.api.shoppingcart
 import org.axonframework.commandhandling.CommandExecutionException
 import org.axonframework.commandhandling.CommandHandler
 import org.axonframework.commandhandling.CommandMessage
@@ -32,65 +30,75 @@ class Cart() {
     @CommandHandler
     @CreationPolicy(AggregateCreationPolicy.CREATE_IF_MISSING)
     fun handle(
-        command: shoppingCart.AddProductToCartCommand,
+        command: shoppingcart.AddProductToCartCommand,
         deadlineManager: DeadlineManager,
         nextUuid: () -> UUID = { UUID.randomUUID() }
     ): UUID {
-        applyEvent(shoppingCart.CartCreatedEvent(nextUuid(), command.owner))
+        val cartId = nextUuid()
+        applyEvent(shoppingcart.CartCreatedEvent(cartId, command.owner))
         if (products.contains(command.productId))
             throw CommandExecutionException("Product already in the cart! ", null)
 
-        applyEvent(shoppingCart.ProductAddedToCartEvent(id, command.productId))
+        applyEvent(shoppingcart.ProductAddedToCartEvent(cartId, command.productId))
         deadlineManager.schedule(abandonCartAfter, ABANDON_CART)
-        return id
+        return cartId
     }
 
     @CommandHandler
-    fun handle(command: shoppingCart.RemoveProductFromCartCommand) {
+    fun handle(command: shoppingcart.RemoveProductFromCartCommand) {
         if (!products.contains(command.productId)) throw CommandExecutionException("Product not in the cart! ", null)
 
-        applyEvent(shoppingCart.ProductRemovedFromCartEvent(id, command.productId))
+        applyEvent(shoppingcart.ProductRemovedFromCartEvent(id, command.productId))
     }
 
     @CommandHandler
-    fun handle(command: shoppingCart.AbandonCartCommand) {
-        applyEvent(shoppingCart.CartAbandonedEvent(command.cartId, shoppingCart.CartAbandonedEvent.Reason.MANUAL))
+    fun handle(command: shoppingcart.AbandonCartCommand) {
+        applyEvent(shoppingcart.CartAbandonedEvent(command.cartId, shoppingcart.CartAbandonedEvent.Reason.MANUAL))
     }
 
     @CommandHandler
-    fun handle(command: shoppingCart.CheckOutCartCommand) {
-        attemptTo { createNew(Order::class.java) { Order(products, owner) } }
-        applyEvent(shoppingCart.CartCheckedOutEvent(command.cartId))
+    fun handle(command: shoppingcart.CheckOutCartCommand) {
+        applyEvent(shoppingcart.CartCheckoutRequestedEvent(command.cartId, owner, products))
+    }
+
+    @CommandHandler
+    fun handle(command: shoppingcart.CompleteCartCheckoutCommand) {
+        applyEvent(shoppingcart.CartCheckoutCompletedEvent(command.cartId))
+    }
+
+    @CommandHandler
+    fun handle(command: shoppingcart.HandleCartCheckoutFailureCommand) {
+        applyEvent(shoppingcart.CartCheckoutFailedEvent(command.cartId))
     }
 
     @DeadlineHandler(deadlineName = ABANDON_CART)
     fun onDeadline() {
-        applyEvent(shoppingCart.CartAbandonedEvent(id, shoppingCart.CartAbandonedEvent.Reason.TIMEOUT))
+        applyEvent(shoppingcart.CartAbandonedEvent(id, shoppingcart.CartAbandonedEvent.Reason.TIMEOUT))
     }
 
     @EventSourcingHandler
-    fun on(event: shoppingCart.CartCreatedEvent) {
+    fun on(event: shoppingcart.CartCreatedEvent) {
         id = event.id
         owner = event.owner
     }
 
     @EventSourcingHandler
-    fun on(event: shoppingCart.ProductAddedToCartEvent) {
+    fun on(event: shoppingcart.ProductAddedToCartEvent) {
         products.add(event.productId)
     }
 
     @EventSourcingHandler
-    fun on(event: shoppingCart.ProductRemovedFromCartEvent) {
+    fun on(event: shoppingcart.ProductRemovedFromCartEvent) {
         products.remove(event.productId)
     }
 
     @EventSourcingHandler
-    fun on(event: shoppingCart.CartAbandonedEvent) {
+    fun on(event: shoppingcart.CartAbandonedEvent) {
         markDeleted()
     }
 
     @EventSourcingHandler
-    fun on(event: shoppingCart.CartCheckedOutEvent) {
+    fun on(event: shoppingcart.CartCheckoutCompletedEvent) {
         markDeleted()
     }
 

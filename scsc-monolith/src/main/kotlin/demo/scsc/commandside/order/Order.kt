@@ -1,5 +1,6 @@
 package demo.scsc.commandside.order
 
+import demo.scsc.api.order
 import demo.scsc.api.order.CompleteOrderCommand
 import demo.scsc.api.order.OrderCompletedEvent
 import demo.scsc.api.order.OrderCreatedEvent
@@ -27,23 +28,26 @@ class Order() {
     private lateinit var owner: String
     internal val items: MutableList<OrderItem> = mutableListOf()
 
-    constructor(itemIds: List<UUID>, owner: String): this() {
+    @CommandHandler
+    fun handle(command: order.CreateOrderCommand, nextUuid: () -> UUID = { UUID.randomUUID() }): UUID {
         val productValidation = ProductValidation()
         val orderItems = mutableListOf<OrderItem>()
-        for (itemId in itemIds) {
+        for (itemId in command.itemIds) {
             val info = productValidation.forProduct(itemId)
                 ?: throw IllegalStateException("No product validation available")
             check(info.forSale) { "Product ${info.name} is no longer on sale" }
             orderItems.add(OrderItem(itemId, info.name, info.price))
         }
 
+        val orderId = nextUuid()
         applyEvent(
             OrderCreatedEvent(
-                orderId = UUID.randomUUID(),
-                owner = owner,
+                orderId = orderId,
+                owner = command.owner,
                 items = orderItems
             )
         )
+        return orderId
     }
 
     @CommandHandler

@@ -6,6 +6,7 @@ import demo.scsc.commandside.order.Order
 import demo.scsc.commandside.order.ProductValidation
 import demo.scsc.commandside.payment.OrderPayment
 import demo.scsc.commandside.shoppingcart.Cart
+import demo.scsc.commandside.shoppingcart.WheneverCheckoutIsIRequested
 import demo.scsc.commandside.warehouse.Shipment
 import demo.scsc.config.AxonFramework
 import demo.scsc.config.resolver.UuidGenParameterResolverFactory
@@ -35,7 +36,8 @@ fun main() {
             OrdersProjection(),
             ProductValidation(),
             PaymentProjection(),
-            ShipmentProjection()
+            ShipmentProjection(),
+            WheneverCheckoutIsIRequested()
         )
         .withCustomParameterResolverFactories(listOf(UuidGenParameterResolverFactory()))
         .connectedToInspectorAxon(appConfig.getConfig("application.axon.inspector"))

@@ -22,17 +22,16 @@ class OrderTest {
 
     companion object {
         private val orderId = UUID.randomUUID()
-
-        internal val orderCreatedEvent = order.OrderCreatedEvent(
-            orderId = orderId,
+        private val createOrderCommand = order.CreateOrderCommand(
             owner = "owner",
-            items = listOf(
-                order.OrderCreatedEvent.OrderItem(
-                    UUID.randomUUID(),
-                    "name",
-                    BigDecimal.valueOf(1.0)
-                )
-            )
+            itemIds = listOf(UUID.randomUUID())
+        )
+        private val orderCreatedEvent = order.OrderCreatedEvent(
+            orderId = orderId,
+            owner = createOrderCommand.owner,
+            items = createOrderCommand.itemIds.map {
+                order.OrderCreatedEvent.OrderItem(it, "name", BigDecimal.valueOf(1.0))
+            }
         )
         private val completeOrderCommand = order.CompleteOrderCommand(orderId)
         private val orderCompletedEvent = order.OrderCompletedEvent(orderId = orderId)

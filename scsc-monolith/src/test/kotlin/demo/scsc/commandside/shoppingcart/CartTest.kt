@@ -1,14 +1,12 @@
 package demo.scsc.commandside.shoppingcart
 
-import demo.scsc.api.productCatalog
-import demo.scsc.api.shoppingCart
+import demo.scsc.api.shoppingcart
 import demo.scsc.commandside.shoppingcart.Cart.Companion.ABANDON_CART
 import demo.scsc.commandside.shoppingcart.Cart.Companion.abandonCartAfter
 import org.assertj.core.api.Assertions.assertThat
 import org.axonframework.commandhandling.CommandExecutionException
 import org.axonframework.test.aggregate.AggregateTestFixture
 import org.junit.jupiter.api.Test
-import java.math.BigDecimal
 import java.util.*
 
 class CartTest {
@@ -91,76 +89,89 @@ class CartTest {
     fun `on AbandonCartCommand, should publish CartAbandonedEvent`() {
         cart.given(cartCreatedEvent, productAddedToCartEvent)
             .`when`(abandonCartCommand)
-            .expectEvents(cartAbandonedEvent.copy(reason = shoppingCart.CartAbandonedEvent.Reason.MANUAL))
+            .expectEvents(cartAbandonedEvent.copy(reason = shoppingcart.CartAbandonedEvent.Reason.MANUAL))
     }
 
     @Test
-    fun `should attempt to create a new Order on CheckOutCartCommand`() {
-        cart.given(productUpdateReceivedEvent, cartCreatedEvent, productAddedToCartEvent)
+    fun `should publish CartCheckoutRequestedEvent on CheckOutCartCommand`() {
+        cart.given(cartCreatedEvent, productAddedToCartEvent)
             .`when`(checkOutCartCommand)
-            .expectEvents(cartCheckedOutEvent)
+            .expectEvents(cartCheckoutRequestedEvent)
     }
 
     @Test
-    fun `should publish CartCheckedOutEvent on CheckOutCartCommand`() {
+    fun `should publish CartCheckoutCompletedEvent on CompleteCartCheckoutCommand`() {
         cart
             .given(
                 cartCreatedEvent,
                 productAddedToCartEvent,
+                cartCheckoutRequestedEvent
             )
-            .`when`(checkOutCartCommand)
-            .expectEvents(cartCheckedOutEvent)
+            .`when`(completeCartCheckoutCommand)
+            .expectEvents(cartCheckoutCompletedEvent)
+    }
+
+    @Test
+    fun `should publish CartCheckoutFailedEvent on HandleCartCheckoutFailureCommand`() {
+        cart
+            .given(
+                cartCreatedEvent,
+                productAddedToCartEvent,
+                cartCheckoutRequestedEvent
+            )
+            .`when`(handleCheckoutFailureCommand)
+            .expectEvents(checkoutFailedEvent)
     }
 
 
     companion object {
         private val cartId = UUID.fromString("00000000-0000-0000-0000-0c09a0d0d88e")
 
-        private val addProductToCartCommand = shoppingCart.AddProductToCartCommand(
+        internal val addProductToCartCommand = shoppingcart.AddProductToCartCommand(
             cartId = cartId,
             productId = UUID.randomUUID(),
             owner = "John Doe"
         )
-        private val cartCreatedEvent = shoppingCart.CartCreatedEvent(
+        private val cartCreatedEvent = shoppingcart.CartCreatedEvent(
             id = cartId,
             owner = addProductToCartCommand.owner
         )
-        private val productAddedToCartEvent = shoppingCart.ProductAddedToCartEvent(
+        private val productAddedToCartEvent = shoppingcart.ProductAddedToCartEvent(
             cartId = cartId,
             productId = addProductToCartCommand.productId
         )
 
-        private val removeProductFromCartCommand = shoppingCart.RemoveProductFromCartCommand(
+        private val removeProductFromCartCommand = shoppingcart.RemoveProductFromCartCommand(
             cartId = cartId,
             productId = addProductToCartCommand.productId
         )
-        private val productRemovedFromCartEvent = shoppingCart.ProductRemovedFromCartEvent(
+        private val productRemovedFromCartEvent = shoppingcart.ProductRemovedFromCartEvent(
             cartId = cartId,
             productId = addProductToCartCommand.productId
         )
 
-        private val abandonCartCommand = shoppingCart.AbandonCartCommand(
+        private val abandonCartCommand = shoppingcart.AbandonCartCommand(
             cartId = cartId
         )
-        private val cartAbandonedEvent = shoppingCart.CartAbandonedEvent(
+        private val cartAbandonedEvent = shoppingcart.CartAbandonedEvent(
             cartId = cartId,
-            reason = shoppingCart.CartAbandonedEvent.Reason.TIMEOUT
+            reason = shoppingcart.CartAbandonedEvent.Reason.TIMEOUT
         )
 
-        private val checkOutCartCommand = shoppingCart.CheckOutCartCommand(
-            cartId = cartId
-        )
-        private val cartCheckedOutEvent = shoppingCart.CartCheckedOutEvent(
-            cartId = cartId
+        private val checkOutCartCommand = shoppingcart.CheckOutCartCommand(cartId = cartId)
+        internal val cartCheckoutRequestedEvent = shoppingcart.CartCheckoutRequestedEvent(
+            cartId = cartId,
+            owner = addProductToCartCommand.owner,
+            products = listOf(addProductToCartCommand.productId)
         )
 
-        private val productUpdateReceivedEvent = productCatalog.ProductUpdateReceivedEvent(
-            id = addProductToCartCommand.productId,
-            name = "name",
-            price = BigDecimal.valueOf(1.0),
-            image = "image",
-            desc = "desc",
-            onSale = true
+        internal val completeCartCheckoutCommand = shoppingcart.CompleteCartCheckoutCommand(
+            cartId = cartId,
+            orderId = UUID.randomUUID()
         )
+        private val cartCheckoutCompletedEvent = shoppingcart.CartCheckoutCompletedEvent(cartId = cartId)
+
+        internal val handleCheckoutFailureCommand = shoppingcart.HandleCartCheckoutFailureCommand(cartId = cartId)
+        private val checkoutFailedEvent = shoppingcart.CartCheckoutFailedEvent(cartId = cartId)
     }
 }
