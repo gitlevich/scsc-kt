@@ -9,6 +9,7 @@ import demo.scsc.commandside.shoppingcart.Cart
 import demo.scsc.commandside.shoppingcart.WheneverCheckoutIsIRequested
 import demo.scsc.commandside.warehouse.Shipment
 import demo.scsc.config.AxonFramework
+import demo.scsc.config.resolver.ProductValidationResolverFactory
 import demo.scsc.config.resolver.UuidGenParameterResolverFactory
 import demo.scsc.process.OrderCompletionProcess
 import demo.scsc.queryside.order.OrdersProjection
@@ -39,7 +40,12 @@ fun main() {
             ShipmentProjection(),
             WheneverCheckoutIsIRequested()
         )
-        .withCustomParameterResolverFactories(listOf(UuidGenParameterResolverFactory()))
+        .withCustomParameterResolverFactories(
+            listOf(
+                UuidGenParameterResolverFactory(),
+                ProductValidationResolverFactory()
+            )
+        )
         .connectedToInspectorAxon(appConfig.getConfig("application.axon.inspector"))
         .startAndWait()
 }
