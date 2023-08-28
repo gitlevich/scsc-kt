@@ -39,7 +39,11 @@ fun main() {
             ShipmentProjection(),
             WheneverCheckoutIsIRequested()
         )
-        .withCustomParameterResolverFactories(listOf(UuidGenParameterResolverFactory()))
+        .withCustomParameterResolverFactories(
+            listOf(
+                UuidGenParameterResolverFactory(),
+            )
+        )
         .connectedToInspectorAxon(appConfig.getConfig("application.axon.inspector"))
         .startAndWait()
 }
