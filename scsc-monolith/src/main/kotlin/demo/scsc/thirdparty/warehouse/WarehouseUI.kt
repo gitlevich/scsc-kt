@@ -24,8 +24,8 @@ class WarehouseUI(private val axonFramework: Configuration, private val inventor
     init {
         val mainContainer = contentPane
         mainContainer.setLayout(BorderLayout())
-        val shippingTableModel = ShippingTableModel()
-        val productTable = JTable(shippingTableModel)
+        val shipmentTableModel = ShipmentTableModel()
+        val productTable = JTable(shipmentTableModel)
         productTable.preferredScrollableViewportSize = Dimension(500, 70)
         productTable.setDefaultRenderer(UUID::class.java, ProductRenderer())
         productTable.setFillsViewportHeight(true)
@@ -33,24 +33,21 @@ class WarehouseUI(private val axonFramework: Configuration, private val inventor
         val updateButton = JButton("Mark as ready")
         updateButton.addActionListener { action: ActionEvent? ->
             for (selectedRow in productTable.selectedRows) {
-                axonFramework.commandGateway().send<AddProductToPackageCommand, Any>(
-                    AddProductToPackageCommand(
-                        (shippingTableModel.getValueAt(selectedRow, 0) as UUID),
-                        (shippingTableModel.getValueAt(
-                            selectedRow,
-                            1
-                        ) as UUID)
-                    )
-                ) { command: CommandMessage<out AddProductToPackageCommand>, response: CommandResultMessage<*> ->
-                    if (response.isExceptional) {
-                        JOptionPane.showMessageDialog(
-                            this,
-                            response.exceptionResult().message,
-                            "Remote system responded with error",
-                            JOptionPane.ERROR_MESSAGE
-                        )
+                val command = AddProductToPackageCommand(
+                    shipmentId = (shipmentTableModel.getValueAt(selectedRow, 0) as UUID),
+                    productId = (shipmentTableModel.getValueAt(selectedRow, 1) as UUID)
+                )
+                axonFramework.commandGateway()
+                    .send<AddProductToPackageCommand, Any>(command) { message: CommandMessage<out AddProductToPackageCommand>, response: CommandResultMessage<*> ->
+                        if (response.isExceptional) {
+                            JOptionPane.showMessageDialog(
+                                this,
+                                response.exceptionResult().message,
+                                "Remote system responded with error",
+                                JOptionPane.ERROR_MESSAGE
+                            )
+                        }
                     }
-                }
             }
         }
         mainContainer.add(scrollPane, BorderLayout.CENTER)
@@ -70,7 +67,7 @@ class WarehouseUI(private val axonFramework: Configuration, private val inventor
         }
     }
 
-    inner class ShippingTableModel internal constructor() : AbstractTableModel() {
+    inner class ShipmentTableModel internal constructor() : AbstractTableModel() {
         private val columnNames = arrayOf(
             "Shipment",
             "Product"
