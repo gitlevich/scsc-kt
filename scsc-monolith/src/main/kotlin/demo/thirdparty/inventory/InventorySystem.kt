@@ -1,9 +1,8 @@
-package demo.scsc.thirdparty.inventory
+package demo.thirdparty.inventory
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.readValue
-import com.typesafe.config.ConfigFactory
 import demo.scsc.config.AxonFramework.Companion.configure
 import org.axonframework.config.Configuration
 import java.io.IOException
@@ -17,7 +16,7 @@ class InventorySystem {
         inventory = initializeInventory()
         axonFramework = configure("Inventory System")
             .withJsonSerializer()
-            .connectedToInspectorAxon(ConfigFactory.load().getConfig("application.axon.inspector"))
+            .connectedToInspectorAxon()
             .start()
         SwingUtilities.invokeLater { InventoryUI(axonFramework, inventory).start() }
     }
@@ -39,6 +38,6 @@ class InventorySystem {
     }
 }
 
-fun main() {
+fun main(args: Array<String>) {
     InventorySystem()
 }

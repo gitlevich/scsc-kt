@@ -55,34 +55,34 @@ class OrdersProjection {
 
     @QueryHandler
     fun getOrders(query: GetOrdersQuery): GetOrdersQueryResponse {
-        val em = forName("SCSC")!!.newEntityManager
-        val orderEntities = em
-            .createQuery("SELECT p FROM Order AS p WHERE owner = ?1", Order::class.java)
-            .setParameter(1, query.owner)
-            .resultList
-        val response = GetOrdersQueryResponse(
-            orderEntities.stream()
-                .map { orderEntity: Order ->
-                    orderEntity.items.stream().map(OrderItem::price)
-                        .reduce(BigDecimal.ZERO) { obj: BigDecimal?, augend: BigDecimal? -> obj?.add(augend) }
-                        ?.let { price ->
-                            GetOrdersQueryResponse.Order(
-                                id = orderEntity.id,
-                                total = price,
-                                lines = orderEntity.items.stream()
-                                    .map { (_, name, price): OrderItem -> OrderLine(name, price) }
-                                    .collect(Collectors.toList()),
-                                owner = orderEntity.owner,
-                                isPaid = orderEntity.isPaid,
-                                isPrepared = orderEntity.isPrepared,
-                                isShipped = orderEntity.isReady
-                            )
-                        }
-                }
-                .collect(Collectors.toList())
-        )
-        em.close()
-        return response
+        return tx {
+            val orderEntities = it
+                .createQuery("SELECT p FROM Order AS p WHERE owner = ?1", Order::class.java)
+                .setParameter(1, query.owner)
+                .resultList
+            val response = GetOrdersQueryResponse(
+                orderEntities.stream()
+                    .map { orderEntity: Order ->
+                        orderEntity.items.stream().map(OrderItem::price)
+                            .reduce(BigDecimal.ZERO) { obj: BigDecimal?, augend: BigDecimal? -> obj?.add(augend) }
+                            ?.let { price ->
+                                GetOrdersQueryResponse.Order(
+                                    id = orderEntity.id,
+                                    total = price,
+                                    lines = orderEntity.items.stream()
+                                        .map { (_, name, price): OrderItem -> OrderLine(name, price) }
+                                        .collect(Collectors.toList()),
+                                    owner = orderEntity.owner,
+                                    isPaid = orderEntity.isPaid,
+                                    isPrepared = orderEntity.isPrepared,
+                                    isShipped = orderEntity.isReady
+                                )
+                            }
+                    }
+                    .collect(Collectors.toList())
+            )
+            response
+        }
     }
 
     @ResetHandler

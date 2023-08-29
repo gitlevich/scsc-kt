@@ -4,6 +4,7 @@ plugins {
     kotlin("plugin.noarg") version kotlinGradlePluginVersion
     kotlin("plugin.allopen") version kotlinGradlePluginVersion
     id("org.jetbrains.kotlin.plugin.jpa") version kotlinGradlePluginVersion
+    id("com.github.johnrengelman.shadow") version "7.0.0"
 }
 
 noArg {
@@ -85,4 +86,38 @@ dependencies {
     testImplementation("org.assertj:assertj-core:$assertjVersion")
     testImplementation("org.axonframework:axon-test:$axonVersion")
     testImplementation("com.h2database:h2:2.2.220")
+
+    tasks {
+
+        val main by creating(com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar::class) {
+            archiveBaseName.set("app")
+            configurations = listOf(project.configurations.getByName("runtimeClasspath"))
+            from(sourceSets.main.get().output)
+            manifest {
+                attributes("Main-Class" to "demo.scsc.SCSCAppKt")
+            }
+        }
+
+        val inventory by creating(com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar::class) {
+            archiveBaseName.set("inventory")
+            configurations = listOf(project.configurations.getByName("runtimeClasspath"))
+            from(sourceSets.main.get().output)
+            manifest {
+                attributes("Main-Class" to "demo.thirdparty.inventory.InventorySystemKt")
+            }
+        }
+
+        val warehouse by creating(com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar::class) {
+            archiveBaseName.set("warehouse")
+            configurations = listOf(project.configurations.getByName("runtimeClasspath"))
+            from(sourceSets.main.get().output)
+            manifest {
+                attributes("Main-Class" to "demo.thirdparty.warehouse.WarehouseSystemKt")
+            }
+        }
+
+        named("assemble") {
+            dependsOn(main, inventory, warehouse)
+        }
+    }
 }

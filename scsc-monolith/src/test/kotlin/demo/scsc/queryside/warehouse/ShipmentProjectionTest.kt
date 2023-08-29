@@ -1,5 +1,6 @@
 package demo.scsc.queryside.warehouse
 
+import com.typesafe.config.ConfigFactory
 import demo.scsc.api.warehouse
 import demo.scsc.util.tx
 import org.assertj.core.api.Assertions.assertThat
@@ -26,7 +27,8 @@ class ShipmentProjectionTest {
 
     @Before
     fun setUp() {
-        tx { it.createQuery("DELETE FROM ShipmentProduct").executeUpdate() }
+        val config = ConfigFactory.load("application-test.conf")
+        tx(config) { it.createQuery("DELETE FROM ShipmentProduct").executeUpdate() }
     }
 
     companion object {

@@ -1,6 +1,5 @@
 package demo.scsc
 
-import com.typesafe.config.ConfigFactory
 import demo.scsc.Constants.SCSC
 import demo.scsc.commandside.order.Order
 import demo.scsc.commandside.order.ProductValidation
@@ -17,9 +16,7 @@ import demo.scsc.queryside.productcatalog.ProductsProjection
 import demo.scsc.queryside.shoppingcart.CartsProjection
 import demo.scsc.queryside.warehouse.ShipmentProjection
 
-fun main() {
-    val appConfig = ConfigFactory.load()
-
+fun main(args: Array<String>) {
     AxonFramework.configure("$SCSC App")
         .withJsonSerializer()
         .withJPATokenStoreIn(SCSC)
@@ -44,6 +41,6 @@ fun main() {
                 UuidGenParameterResolverFactory(),
             )
         )
-        .connectedToInspectorAxon(appConfig.getConfig("application.axon.inspector"))
+        .connectedToInspectorAxon()
         .startAndWait()
 }

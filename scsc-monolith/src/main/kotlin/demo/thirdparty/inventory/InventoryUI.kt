@@ -1,4 +1,4 @@
-package demo.scsc.thirdparty.inventory
+package demo.thirdparty.inventory
 
 import demo.scsc.api.productcatalog
 import org.axonframework.config.Configuration

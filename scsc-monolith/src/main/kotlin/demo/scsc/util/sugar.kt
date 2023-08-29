@@ -1,14 +1,16 @@
 package demo.scsc.util
 
+import com.typesafe.config.Config
+import com.typesafe.config.ConfigFactory
 import demo.scsc.Constants.SCSC
+import demo.scsc.config.AxonFramework
 import demo.scsc.config.JpaPersistenceUnit
 import jakarta.persistence.EntityManager
 import jakarta.persistence.NoResultException
-import org.axonframework.commandhandling.CommandExecutionException
 import org.axonframework.queryhandling.QueryExecutionException
 
-fun <RESULT> tx(f: (EntityManager) -> RESULT): RESULT =
-    JpaPersistenceUnit.forName(SCSC)!!.newEntityManager.run {
+fun <RESULT> tx(config: Config = AxonFramework.appConfig, f: (EntityManager) -> RESULT): RESULT =
+    JpaPersistenceUnit.forName(SCSC, config)!!.newEntityManager.run {
         try {
             transaction.begin()
             f(this).also {
@@ -21,8 +23,12 @@ fun <RESULT> tx(f: (EntityManager) -> RESULT): RESULT =
         }
     }
 
-fun <QUERY, RESPONSE> answer(q: QUERY, f: (EntityManager) -> RESPONSE): RESPONSE = try {
-    f(JpaPersistenceUnit.forName(SCSC)!!.newEntityManager)
+fun <QUERY, RESPONSE> answer(
+    q: QUERY,
+    config: Config = AxonFramework.appConfig,
+    f: (EntityManager) -> RESPONSE
+): RESPONSE = try {
+    f(JpaPersistenceUnit.forName(SCSC, config)!!.newEntityManager)
 } catch (e: NoResultException) {
     throw QueryExecutionException("Unable to execute query ${q.toString()}", null)
 }

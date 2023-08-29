@@ -1,0 +1,6 @@
+FROM openjdk:17-jdk-slim
+EXPOSE 8080
+COPY build/libs/inventory*SNAPSHOT.jar /opt/app.jar
+WORKDIR /opt
+ENV POSTGRES_URL=jdbc:postgresql://postgres/scsc
+ENTRYPOINT ["java", "-jar", "app.jar"]

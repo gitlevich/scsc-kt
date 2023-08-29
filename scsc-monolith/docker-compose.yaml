@@ -45,5 +45,52 @@ services:
       timeout: 10s
       retries: 3
 
+#  scsc:
+#    hostname: scsc
+#    container_name: scsc
+#    restart: always
+#    environment:
+#      - AXON_AXONSERVER_SERVERS=axonserver
+#      - AXON_AXONSERVER_CONTEXT=default
+#      - POSTGRES_URL=jdbc:postgresql://postgres/scsc
+#    build:
+#      dockerfile: ../docker/Dockerfile_scsc
+#    depends_on:
+#      axonserver:
+#        condition: service_healthy
+#
+#  warehouse:
+#    hostname: warehouse
+#    container_name: warehouse
+#    restart: always
+#    environment:
+#      - AXON_AXONSERVER_SERVERS=axonserver
+#      - AXON_AXONSERVER_CONTEXT=default
+#      - POSTGRES_URL=jdbc:postgresql://postgres/scsc
+#    ports:
+#      - "8080:8081"
+#    build:
+#      dockerfile: ./docker/Dockerfile_warehouse
+#    depends_on:
+#      axonserver:
+#        condition: service_healthy
+#
+#  inventory:
+#    hostname: inventory
+#    container_name: inventory
+#    restart: always
+#    environment:
+#      - AXON_AXONSERVER_SERVERS=axonserver
+#      - AXON_AXONSERVER_CONTEXT=default
+#      - POSTGRES_URL=jdbc:postgresql://postgres/scsc
+#    ports:
+#      - "8081:8082"
+#    build:
+#      dockerfile: ../docker/Dockerfile_inventory
+#    depends_on:
+#      axonserver:
+#        condition: service_healthy
+#
+
 volumes:
   axoniq_data:

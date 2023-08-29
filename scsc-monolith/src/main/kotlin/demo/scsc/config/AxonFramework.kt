@@ -1,9 +1,12 @@
 package demo.scsc.config
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.typesafe.config.Config
-import org.axonframework.config.*
+import com.typesafe.config.ConfigFactory
+import org.axonframework.config.Configuration
+import org.axonframework.config.ConfigurationParameterResolverFactory
+import org.axonframework.config.Configurer
+import org.axonframework.config.DefaultConfigurer
 import org.axonframework.eventhandling.tokenstore.jpa.JpaTokenStore
 import org.axonframework.messaging.annotation.ClasspathParameterResolverFactory
 import org.axonframework.messaging.annotation.MultiParameterResolverFactory
@@ -12,13 +15,14 @@ import org.axonframework.modelling.saga.repository.jpa.JpaSagaStore
 import org.axonframework.serialization.json.JacksonSerializer
 import org.slf4j.LoggerFactory
 
-class AxonFramework private constructor(private val applicationName: String) {
-    internal val configurer: Configurer
+class AxonFramework private constructor(private val applicationName: String, private val appConfig: Config) {
+    private val configurer: Configurer
     private lateinit var configuration: Configuration
 
     init {
         System.setProperty("axon.application.name", applicationName)
         configurer = DefaultConfigurer.defaultConfiguration()
+        LOG.info("Starting application $applicationName with config: $appConfig")
     }
 
     fun start(): Configuration {
@@ -70,7 +74,7 @@ class AxonFramework private constructor(private val applicationName: String) {
     }
 
     fun withJPATokenStoreIn(persistenceUnitName: String): AxonFramework {
-        val jpaPersistenceUnit: JpaPersistenceUnit = jpaPersistenceUnit(persistenceUnitName)
+        val jpaPersistenceUnit: JpaPersistenceUnit = jpaPersistenceUnit(persistenceUnitName, )
         configurer
             .eventProcessing { eventProcessingConfigurer ->
                 eventProcessingConfigurer.registerDefaultTransactionManager { jpaPersistenceUnit.transactionManager }
@@ -84,7 +88,7 @@ class AxonFramework private constructor(private val applicationName: String) {
         return this
     }
 
-    private fun jpaPersistenceUnit(persistenceUnitName: String) = JpaPersistenceUnit.forName(persistenceUnitName)
+    private fun jpaPersistenceUnit(persistenceUnitName: String) = JpaPersistenceUnit.forName(persistenceUnitName, appConfig)
         ?: throw RuntimeException("No JPA persistence unit found with name $persistenceUnitName")
 
     fun withAggregates(vararg aggregates: Class<*>): AxonFramework {
@@ -118,10 +122,11 @@ class AxonFramework private constructor(private val applicationName: String) {
         return this
     }
 
-    fun connectedToInspectorAxon(inspectorAxonConfig: Config?): AxonFramework {
+    fun connectedToInspectorAxon(): AxonFramework {
+        val inspectorAxonConfig = appConfig.getConfig("application.axon.inspector")
         if (inspectorAxonConfig.isInspectorAxonConfigured()) {
             InspectorAxonConnection.connect()
-                .toWorkspace(inspectorAxonConfig!!.getString("workspace"))
+                .toWorkspace(inspectorAxonConfig.getString("workspace"))
                 .toEnvironment(inspectorAxonConfig.getString("environment"))
                 .asApplication(applicationName)
                 .withAccessToken(inspectorAxonConfig.getString("token"))
@@ -138,7 +143,8 @@ class AxonFramework private constructor(private val applicationName: String) {
         private val LOCK = Any()
         private val LOG = LoggerFactory.getLogger(AxonFramework::class.java)
 
-        fun configure(name: String): AxonFramework = AxonFramework(name)
+        val appConfig: Config = ConfigFactory.load()
+        fun configure(name: String): AxonFramework = AxonFramework(name, appConfig)
         fun Config?.isInspectorAxonConfigured(): Boolean = (this != null
                 && hasPath("workspace")
                 && hasPath("environment")

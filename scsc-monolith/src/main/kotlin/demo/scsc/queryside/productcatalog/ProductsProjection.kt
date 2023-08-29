@@ -13,6 +13,7 @@ import org.axonframework.queryhandling.QueryHandler
 
 @ProcessingGroup(Constants.PROCESSING_GROUP_PRODUCT)
 class ProductsProjection {
+
     @EventHandler
     fun on(productUpdateReceivedEvent: ProductUpdateReceivedEvent) {
         tx { em ->

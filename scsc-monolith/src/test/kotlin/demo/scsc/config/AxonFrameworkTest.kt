@@ -1,5 +1,6 @@
 package demo.scsc.config
 
+import com.typesafe.config.ConfigFactory
 import demo.scsc.config.resolver.UuidGenParameterResolverFactory
 import org.assertj.core.api.Assertions.assertThat
 import org.axonframework.config.ConfigurationParameterResolverFactory
@@ -11,6 +12,7 @@ class AxonFrameworkTest {
 
     @Nested
     inner class CustomParameterResolverFactoryConfiguration {
+        private val config = ConfigFactory.load()
 
         @Test
         fun `should register custom parameter resolver factories if given any`() {

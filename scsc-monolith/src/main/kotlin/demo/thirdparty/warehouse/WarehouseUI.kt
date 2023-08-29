@@ -1,4 +1,4 @@
-package demo.scsc.thirdparty.warehouse
+package demo.thirdparty.warehouse
 
 import demo.scsc.api.warehouse.AddProductToPackageCommand
 import demo.scsc.api.warehouse.GetShippingQueryResponse

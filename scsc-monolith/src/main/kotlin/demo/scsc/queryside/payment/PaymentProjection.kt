@@ -28,12 +28,12 @@ class PaymentProjection {
 
     @EventHandler
     fun on(event: PaymentReceivedEvent) {
-        tx { em ->
-            em.find(Payment::class.java, event.orderPaymentId)?.let { paymentEntity ->
+        tx {
+            it.find(Payment::class.java, event.orderPaymentId)?.let { paymentEntity ->
                 var paid = paymentEntity.paidAmount!!
                 paid = paid.add(event.amount)
                 paymentEntity.paidAmount = paid
-                em.merge(paymentEntity)
+                it.merge(paymentEntity)
             }
 
         }

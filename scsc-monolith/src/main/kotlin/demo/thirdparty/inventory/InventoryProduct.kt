@@ -1,4 +1,4 @@
-package demo.scsc.thirdparty.inventory
+package demo.thirdparty.inventory
 
 import java.math.BigDecimal
 import java.util.*
