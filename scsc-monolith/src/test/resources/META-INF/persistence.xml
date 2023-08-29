@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence xmlns="https://jakarta.ee/xml/ns/persistence"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence https://jakarta.ee/xml/ns/persistence/persistence_3_0.xsd"
+             version="3.0">
+    <persistence-unit name="SCSC">
+        <class>org.axonframework.eventhandling.tokenstore.jpa.TokenEntry</class>
+        <class>org.axonframework.modelling.saga.repository.jpa.SagaEntry</class>
+        <class>org.axonframework.modelling.saga.repository.jpa.AssociationValueEntry</class>
+        <class>demo.scsc.queryside.productcatalog.CatalogProduct</class>
+        <class>demo.scsc.queryside.order.Order</class>
+        <class>demo.scsc.queryside.order.OrderItem</class>
+        <class>demo.scsc.queryside.warehouse.Shipment</class>
+        <class>demo.scsc.queryside.warehouse.ShipmentItem</class>
+        <class>demo.scsc.commandside.order.Product</class>
+        <class>demo.scsc.queryside.warehouse.ShipmentProduct</class>
+
+        <properties>
+            <property name="hibernate.hbm2ddl.auto" value="update" />
+
+            <property name="jakarta.persistence.jdbc.driver" value="org.h2.Driver" />
+            <property name="jakarta.persistence.jdbc.url" value="jdbc:h2:mem:testdb" />
+            <property name="jakarta.persistence.jdbc.user" value="sa" />
+            <property name="jakarta.persistence.jdbc.password" value="" />
+            <property name="hibernate.dialect" value="org.hibernate.dialect.H2Dialect"/>
+        </properties>
+    </persistence-unit>
+</persistence>

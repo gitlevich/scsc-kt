@@ -84,4 +84,5 @@ dependencies {
     testImplementation("io.mockk:mockk:$mockkVersion")
     testImplementation("org.assertj:assertj-core:$assertjVersion")
     testImplementation("org.axonframework:axon-test:$axonVersion")
+    testImplementation("com.h2database:h2:2.2.220")
 }

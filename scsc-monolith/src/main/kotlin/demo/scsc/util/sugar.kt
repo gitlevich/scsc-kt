@@ -27,8 +27,3 @@ fun <QUERY, RESPONSE> answer(q: QUERY, f: (EntityManager) -> RESPONSE): RESPONSE
     throw QueryExecutionException("Unable to execute query ${q.toString()}", null)
 }
 
-fun attemptTo(f: () -> Unit) = try {
-    f()
-} catch (e: Exception) {
-    throw CommandExecutionException(e.message, e)
-}

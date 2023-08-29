@@ -1,8 +1,7 @@
 package demo.scsc.queryside.warehouse
 
-import demo.scsc.Constants
 import demo.scsc.api.warehouse
-import demo.scsc.config.JpaPersistenceUnit
+import demo.scsc.util.tx
 import org.assertj.core.api.Assertions.assertThat
 import org.axonframework.queryhandling.SimpleQueryUpdateEmitter
 import org.junit.Before
@@ -27,12 +26,7 @@ class ShipmentProjectionTest {
 
     @Before
     fun setUp() {
-        JpaPersistenceUnit.forName(Constants.SCSC)!!.newEntityManager.run {
-            transaction.begin()
-            createQuery("DELETE FROM ShipmentProduct").executeUpdate()
-            transaction.commit()
-            close()
-        }
+        tx { it.createQuery("DELETE FROM ShipmentProduct").executeUpdate() }
     }
 
     companion object {
