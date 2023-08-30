@@ -3,8 +3,7 @@ package demo.scsc.queryside.order
 import com.typesafe.config.Config
 import demo.scsc.Constants
 import demo.scsc.api.order.GetOrdersQuery
-import demo.scsc.api.order.GetOrdersQueryResponse
-import demo.scsc.api.order.GetOrdersQueryResponse.OrderLine
+import demo.scsc.api.order.GetOrdersQuery.GetOrdersQueryResponse
 import demo.scsc.api.order.OrderCompletedEvent
 import demo.scsc.api.order.OrderCreatedEvent
 import demo.scsc.api.payment.OrderFullyPaidEvent
@@ -20,65 +19,62 @@ import org.axonframework.messaging.interceptors.MessageHandlerInterceptor
 import org.axonframework.queryhandling.QueryHandler
 import org.slf4j.LoggerFactory
 import java.math.BigDecimal
+import java.util.*
 
 @ProcessingGroup(Constants.PROCESSING_GROUP_ORDER)
 class OrdersProjection(private val appConfig: Config) {
 
     @EventHandler
-    fun on(orderCreatedEvent: OrderCreatedEvent) {
-        tx(appConfig) { it.persist(orderCreatedEvent.toEntity()) }
+    fun on(event: OrderCreatedEvent) {
+        tx(appConfig) { it.persist(event.toEntity()) }
     }
 
     @EventHandler
-    fun on(orderFullyPaidEvent: OrderFullyPaidEvent) {
-        tx(appConfig) {
-            val orderEntity = it.find(Order::class.java, orderFullyPaidEvent.orderId)
-            it.merge(orderEntity.copy(isPaid = true))
-        }
+    fun on(event: OrderFullyPaidEvent) {
+        updated(event.orderId) { it.copy(isPaid = true) }
     }
 
     @EventHandler
-    fun on(packageReadyEvent: PackageReadyEvent) {
-        tx(appConfig) {
-            val orderEntity = it.find(Order::class.java, packageReadyEvent.orderId)
-            it.merge(orderEntity.copy(isPrepared = true))
-        }
+    fun on(event: PackageReadyEvent) {
+        updated(event.orderId) { it.copy(isPrepared = true) }
     }
 
     @EventHandler
-    fun on(orderCompletedEvent: OrderCompletedEvent) {
-        tx(appConfig) {
-            val orderEntity = it.find(Order::class.java, orderCompletedEvent.orderId)
-            it.merge(orderEntity.copy(isReady = true))
-        }
+    fun on(event: OrderCompletedEvent) {
+        updated(event.orderId) { it.copy(isReady = true) }
     }
 
     @QueryHandler
     fun getOrders(query: GetOrdersQuery): GetOrdersQueryResponse = tx(appConfig) { entityManager ->
+        val orders = entityManager
+            .createQuery("SELECT p FROM Order AS p WHERE owner = ?1", Order::class.java)
+            .setParameter(1, query.owner)
+            .resultList
+
         GetOrdersQueryResponse(
-            entityManager
-                .createQuery("SELECT p FROM Order AS p WHERE owner = ?1", Order::class.java)
-                .setParameter(1, query.owner)
-                .resultList
-                .map { order: Order ->
-                    order.items
-                        .map { it.price }
-                        .fold(BigDecimal.ZERO) { r, c -> r.add(c) }
-                        .let { price ->
-                            GetOrdersQueryResponse.Order(
-                                id = order.id,
-                                total = price,
-                                lines = order.items
-                                    .map { (_, name, price) -> OrderLine(name, price) }
-                                    .toList(),
-                                owner = order.owner,
-                                isPaid = order.isPaid,
-                                isPrepared = order.isPrepared,
-                                isShipped = order.isReady
-                            )
-                        }
-                }
-                .toList()
+            orders.map { order ->
+                order.items
+                    .map { it.price }
+                    .fold(BigDecimal.ZERO) { r, c -> r.add(c) }
+                    .let { price ->
+                        GetOrdersQueryResponse.Order(
+                            id = order.id,
+                            total = price.setScale(2),
+                            lines = order.items
+                                .map { (_, name, price) ->
+                                    GetOrdersQueryResponse.OrderLine(
+                                        name,
+                                        price.setScale(2)
+                                    )
+                                }
+                                .toList(),
+                            owner = order.owner,
+                            isPaid = order.isPaid,
+                            isPrepared = order.isPrepared,
+                            isShipped = order.isReady
+                        )
+                    }
+            }
         )
     }
 
@@ -99,6 +95,14 @@ class OrdersProjection(private val appConfig: Config) {
     fun intercept(message: EventMessage<*>, interceptorChain: InterceptorChain) {
         LOG.info("[    EVENT ] " + message.payload.toString())
         interceptorChain.proceed()
+    }
+
+    private fun updated(orderId: UUID, update: (Order) -> Order) {
+        tx(appConfig) { em ->
+            em.find(Order::class.java, orderId)
+                ?.let { order -> em.merge(update(order)) }
+                ?: LOG.warn("Order with id $orderId not found")
+        }
     }
 
     companion object {

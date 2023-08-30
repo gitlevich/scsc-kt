@@ -1,6 +1,13 @@
 package demo.scsc.queryside.shoppingcart
 
+import demo.scsc.ShoppingCart.cartAbandonedEvent
+import demo.scsc.ShoppingCart.cartCheckoutCompletedEvent
+import demo.scsc.ShoppingCart.cartCreatedEvent
+import demo.scsc.ShoppingCart.productAddedToCartEvent
+import demo.scsc.ShoppingCart.productRemovedFromCartEvent
+import demo.scsc.TestScenario
 import demo.scsc.api.shoppingcart
+import demo.scsc.appliedTo
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.jupiter.api.extension.ExtensionContext
@@ -8,7 +15,6 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.ArgumentsProvider
 import org.junit.jupiter.params.provider.ArgumentsSource
-import java.util.*
 import java.util.stream.Stream
 
 class CartsProjectionTest {
@@ -17,7 +23,7 @@ class CartsProjectionTest {
 
     @ParameterizedTest
     @ArgumentsSource(ScenarioProvider::class)
-    fun theTest(scenario: Scenario<*>) {
+    fun theTest(scenario: TestScenario<*, *>) {
         scenario.appliedTo(projection)
         assertThat(projection.handle(getCartQuery)).isEqualTo(scenario.result)
     }
@@ -28,38 +34,16 @@ class CartsProjectionTest {
     }
 
     companion object {
-        private val cartCreatedEvent = shoppingcart.CartCreatedEvent(
-            id = UUID.randomUUID(),
-            owner = "test"
-        )
-        private val productAddedToCartEvent = shoppingcart.ProductAddedToCartEvent(
-            cartId = cartCreatedEvent.id,
-            productId = UUID.randomUUID()
-        )
-
-        private val productRemovedFromCartEvent = shoppingcart.ProductRemovedFromCartEvent(
-            cartId = cartCreatedEvent.id,
-            productId = productAddedToCartEvent.productId
-        )
-
-        private val cartAbandonedEvent = shoppingcart.CartAbandonedEvent(
-            cartId = cartCreatedEvent.id,
-            reason = shoppingcart.CartAbandonedEvent.Reason.MANUAL
-        )
-
-        private val cartCheckoutCompletedEvent = shoppingcart.CartCheckoutCompletedEvent(cartId = cartCreatedEvent.id)
-
         private val getCartQuery = shoppingcart.GetCartQuery(owner = cartCreatedEvent.owner)
-
         private class ScenarioProvider : ArgumentsProvider {
             override fun provideArguments(context: ExtensionContext): Stream<Arguments> =
                 listOf(
-                    Scenario(
+                    TestScenario(
                         "should persist the cart on CartCreatedEvent",
                         listOf(cartCreatedEvent),
                         shoppingcart.GetCartQuery.Response(cartCreatedEvent.id, emptyList())
                     ),
-                    Scenario(
+                    TestScenario(
                         "should add a product to cart on ProductAddedToCartEvent",
                         listOf(cartCreatedEvent, productAddedToCartEvent),
                         shoppingcart.GetCartQuery.Response(
@@ -67,7 +51,7 @@ class CartsProjectionTest {
                             listOf(productAddedToCartEvent.productId)
                         )
                     ),
-                    Scenario(
+                    TestScenario(
                         "should remove a product from cart on ProductRemovedFromCartEvent",
                         listOf(cartCreatedEvent, productAddedToCartEvent, productRemovedFromCartEvent),
                         shoppingcart.GetCartQuery.Response(
@@ -75,12 +59,12 @@ class CartsProjectionTest {
                             emptyList()
                         )
                     ),
-                    Scenario(
+                    TestScenario(
                         "should remove the cart on CartCheckoutCompletedEvent",
                         listOf(cartCreatedEvent, productAddedToCartEvent, cartCheckoutCompletedEvent),
                         null
                     ),
-                    Scenario(
+                    TestScenario(
                         "should remove the cart on CartAbandonedEvent",
                         listOf(cartCreatedEvent, cartAbandonedEvent),
                         null
@@ -90,10 +74,3 @@ class CartsProjectionTest {
     }
 }
 
-data class Scenario<T>(val name: String, val events: List<T>, val result: shoppingcart.GetCartQuery.Response?) {
-    fun appliedTo(projection: CartsProjection) = events.forEach { event ->
-        projection::class.java.methods
-            .find { it.name == "on" && it.parameterTypes.firstOrNull() == event!!::class.java }
-            ?.invoke(projection, event)
-    }
-}

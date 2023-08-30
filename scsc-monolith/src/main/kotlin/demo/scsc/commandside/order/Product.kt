@@ -18,7 +18,7 @@ data class Product(
     val name: String,
 
     @Column
-    val price: BigDecimal,
+    val price: BigDecimal, // TODO switch to monetary amount
 
     @Column
     val isOnSale: Boolean

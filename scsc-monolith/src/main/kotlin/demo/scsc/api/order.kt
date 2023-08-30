@@ -7,19 +7,20 @@ import java.util.*
 object order {
     data class CreateOrderCommand(val owner: String, val itemIds: List<UUID>)
     data class CompleteOrderCommand(@TargetAggregateIdentifier val orderId: UUID)
-    data class GetOrdersQuery(val owner: String, val orderId: String)
-    data class GetOrdersQueryResponse(val orders: List<Order>) {
-        data class Order(
-            val id: UUID,
-            val total: BigDecimal,
-            val lines: List<OrderLine>,
-            val owner: String,
-            val isPaid: Boolean,
-            val isPrepared: Boolean,
-            val isShipped: Boolean
-        )
+    data class GetOrdersQuery(val owner: String, val orderId: String) {
+        data class GetOrdersQueryResponse(val orders: List<Order>) {
+            data class Order(
+                val id: UUID,
+                val total: BigDecimal, // TODO switch to monetary amount
+                val lines: List<OrderLine>,
+                val owner: String,
+                val isPaid: Boolean,
+                val isPrepared: Boolean,
+                val isShipped: Boolean
+            )
 
-        data class OrderLine(val name: String, val price: BigDecimal)
+            data class OrderLine(val name: String, val price: BigDecimal)
+        }
     }
 
     data class OrderCompletedEvent(val orderId: UUID)

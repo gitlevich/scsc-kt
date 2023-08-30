@@ -16,8 +16,9 @@ import java.util.*
 object Order {
     val orderId: UUID = UUID.randomUUID()
     val product1: UUID = UUID.randomUUID()
+    val owner: String = "John Doe"
     val createOrderCommand = order.CreateOrderCommand(
-        owner = "John Doe",
+        owner = owner,
         itemIds = listOf(product1)
     )
     val orderCreatedEvent = order.OrderCreatedEvent(
@@ -130,3 +131,4 @@ object Warehouse {
             shipmentRequestedEvent
         ).andMetaData(MetaData.with("orderId", orderId))
 }
+

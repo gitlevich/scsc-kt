@@ -30,7 +30,7 @@ class ProductValidation(private val appConfig: Config) {
 
     class ProductValidationInfo(product: Product) {
         val name: String = product.name
-        val price: BigDecimal = product.price
+        val price: BigDecimal = product.price // TODO switch to monetary amount
         val forSale: Boolean = product.isOnSale
     }
 }
