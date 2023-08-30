@@ -14,42 +14,44 @@ import org.slf4j.LoggerFactory
 @ProcessingGroup(Constants.PROCESSING_GROUP_CART)
 class CartsProjection {
 
+    private val cartStore = CartStore()
+
     @EventHandler
     fun on(event: shoppingcart.CartCreatedEvent) {
-        CartStore().saveCart(event.owner, event.id)
+        cartStore.saveCart(event.owner, event.id)
     }
 
     @EventHandler
     fun on(event: shoppingcart.ProductAddedToCartEvent) {
-        CartStore().saveProduct(
-            event.cartId,
-            event.productId
+        cartStore.saveProduct(
+            cartId = event.cartId,
+            productId = event.productId
         )
     }
 
     @EventHandler
     fun on(event: shoppingcart.ProductRemovedFromCartEvent) {
-        CartStore().removeProduct(event.cartId, event.productId)
+        cartStore.removeProduct(event.cartId, event.productId)
     }
 
     @EventHandler
     fun on(event: shoppingcart.CartAbandonedEvent) {
-        CartStore().removeCart(event.cartId)
+        cartStore.removeCart(event.cartId)
     }
 
     @EventHandler
     fun on(event: shoppingcart.CartCheckoutCompletedEvent) {
-        CartStore().removeCart(event.cartId)
+        cartStore.removeCart(event.cartId)
     }
 
     @QueryHandler
-    fun on(query: shoppingcart.GetCartQuery): shoppingcart.GetCartQuery.Response? =
-        CartStore().getOwnersCarts(query.owner)
+    fun handle(query: shoppingcart.GetCartQuery): shoppingcart.GetCartQuery.Response? =
+        cartStore.getOwnersCarts(query.owner)
 
     @ResetHandler
     fun onReset() {
         LOG.info("[    RESET ] ")
-        CartStore().reset()
+        cartStore.reset()
     }
 
     @MessageHandlerInterceptor(messageType = EventMessage::class)

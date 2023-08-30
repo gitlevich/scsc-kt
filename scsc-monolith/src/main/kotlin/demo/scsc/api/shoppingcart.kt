@@ -25,7 +25,10 @@ object shoppingcart {
     data class CartCheckoutFailedEvent(val cartId: UUID)
 
     data class GetCartQuery(val owner: String) {
-        data class Response(val cartId: UUID, val products: List<UUID>)
+        data class Response(val cartId: UUID, val products: List<UUID>) {
+            operator fun plus(productId: UUID) = copy(products = products + productId)
+            operator fun minus(productId: UUID) = copy(products = products - productId)
+        }
     }
 
     data class AbandonCartCommand(@TargetAggregateIdentifier val cartId: UUID)

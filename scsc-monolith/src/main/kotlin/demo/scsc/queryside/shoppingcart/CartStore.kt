@@ -9,7 +9,6 @@ class CartStore {
     private val storageManager: StorageManager = forLocation("carts")
 
     fun saveCart(owner: String, cartId: UUID) {
-        val cartsRoot = getCartsRoot(true)
         cartsRoot.byUser[owner] = cartId
         cartsRoot.byId[cartId] = GetCartQuery.Response(cartId, LinkedList())
         storageManager.store(cartsRoot.byUser)
@@ -17,18 +16,18 @@ class CartStore {
     }
 
     fun saveProduct(cartId: UUID, productId: UUID) {
-        val getCartQueryResponse = cartsRoot.byId[cartId]
+        val cart = cartsRoot.byId[cartId]
             ?: throw IllegalStateException("No cart with id $cartId")
 
-        val withAnother = getCartQueryResponse.copy(products = getCartQueryResponse.products + productId)
-        storageManager.store(withAnother.products)
-        storageManager.store(withAnother)
+        cartsRoot.byId[cartId] = cart + productId
+        storageManager.store(cartsRoot.byId)
     }
 
-    fun removeProduct(cartId: UUID, productId: UUID?) {
-        val (_, products) = cartsRoot.byId[cartId]
+    fun removeProduct(cartId: UUID, productId: UUID) {
+        val cart = cartsRoot.byId[cartId]
             ?: throw IllegalStateException("No cart with id $cartId")
-        storageManager.store(products - productId)
+        cartsRoot.byId[cartId] = cart - productId
+        storageManager.store(cartsRoot.byId)
     }
 
     fun getOwnersCarts(owner: String): GetCartQuery.Response? {
@@ -50,26 +49,15 @@ class CartStore {
     }
 
     private val cartsRoot: CartsRoot
-        get() = getCartsRoot(false)
-
-    private fun getCartsRoot(create: Boolean): CartsRoot {
-        var cartsRoot = storageManager.root() as CartsRoot
-        if (create) {
-            cartsRoot = CartsRoot()
+        get() = storageManager.root() as? CartsRoot ?: let {
+            val cartsRoot = CartsRoot()
             storageManager.setRoot(cartsRoot)
             storageManager.storeRoot()
+            cartsRoot
         }
-        return cartsRoot
-    }
 
-    class CartsRoot {
-        val byUser: MutableMap<String, UUID> = HashMap()
-        val byId: MutableMap<UUID, GetCartQuery.Response> = HashMap()
-        override fun toString(): String {
-            return "StorageRoot{" +
-                    "cartsByUser=" + byUser +
-                    ", cartsById=" + byId +
-                    '}'
-        }
-    }
+    data class CartsRoot(
+        val byUser: MutableMap<String, UUID> = mutableMapOf(),
+        val byId: MutableMap<UUID, GetCartQuery.Response> = mutableMapOf()
+    )
 }

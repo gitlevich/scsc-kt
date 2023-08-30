@@ -27,8 +27,9 @@ class ShipmentProjectionTest {
 
     @Before
     fun setUp() {
-        val config = ConfigFactory.load("application-test.conf")
-        tx(config) { it.createQuery("DELETE FROM ShipmentProduct").executeUpdate() }
+        tx(ConfigFactory.load("application-test.conf")) {
+            it.createQuery("DELETE FROM ShipmentProduct").executeUpdate()
+        }
     }
 
     companion object {

@@ -9,10 +9,8 @@ object MicrostreamStore {
     private val BASE_STORAGE_PATH = Paths.get(System.getProperty("java.io.tmpdir"), "SCSC")
     private val managers: MutableMap<String, StorageManager> = HashMap()
 
-    @JvmStatic
     @Synchronized
     fun forLocation(location: String): StorageManager =
-        managers[location] ?: EmbeddedStorage.start(BASE_STORAGE_PATH.resolve(location)).also {
-            managers[location] = it
-        }
+        managers[location] ?: EmbeddedStorage.start(BASE_STORAGE_PATH.resolve(location))
+            .also { managers[location] = it }
 }
