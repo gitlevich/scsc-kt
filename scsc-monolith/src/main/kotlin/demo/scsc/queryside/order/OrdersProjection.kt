@@ -1,5 +1,6 @@
 package demo.scsc.queryside.order
 
+import com.typesafe.config.Config
 import demo.scsc.Constants
 import demo.scsc.api.order.GetOrdersQuery
 import demo.scsc.api.order.GetOrdersQueryResponse
@@ -21,15 +22,15 @@ import org.slf4j.LoggerFactory
 import java.math.BigDecimal
 
 @ProcessingGroup(Constants.PROCESSING_GROUP_ORDER)
-class OrdersProjection {
+class OrdersProjection(private val appConfig: Config) {
     @EventHandler
     fun on(orderCreatedEvent: OrderCreatedEvent) {
-        tx { it.persist(orderCreatedEvent.toEntity()) }
+        tx(appConfig) { it.persist(orderCreatedEvent.toEntity()) }
     }
 
     @EventHandler
     fun on(orderFullyPaidEvent: OrderFullyPaidEvent) {
-        tx {
+        tx(appConfig) {
             val orderEntity = it.find(Order::class.java, orderFullyPaidEvent.orderId)
             it.merge(orderEntity.copy(isPaid = true))
         }
@@ -37,7 +38,7 @@ class OrdersProjection {
 
     @EventHandler
     fun on(packageReadyEvent: PackageReadyEvent) {
-        tx {
+        tx(appConfig) {
             val orderEntity = it.find(Order::class.java, packageReadyEvent.orderId)
             it.merge(orderEntity.copy(isPrepared = true))
         }
@@ -45,14 +46,14 @@ class OrdersProjection {
 
     @EventHandler
     fun on(orderCompletedEvent: OrderCompletedEvent) {
-        tx {
+        tx(appConfig) {
             val orderEntity = it.find(Order::class.java, orderCompletedEvent.orderId)
             it.merge(orderEntity.copy(isReady = true))
         }
     }
 
     @QueryHandler
-    fun getOrders(query: GetOrdersQuery): GetOrdersQueryResponse = tx { entityManager ->
+    fun getOrders(query: GetOrdersQuery): GetOrdersQueryResponse = tx(appConfig) { entityManager ->
         GetOrdersQueryResponse(
             entityManager
                 .createQuery("SELECT p FROM Order AS p WHERE owner = ?1", Order::class.java)
@@ -82,7 +83,7 @@ class OrdersProjection {
 
     @ResetHandler
     fun onReset(resetContext: ResetContext<*>?) {
-        tx { it.createQuery("DELETE FROM Order").executeUpdate() }
+        tx(appConfig) { it.createQuery("DELETE FROM Order").executeUpdate() }
     }
 
     private fun OrderCreatedEvent.toEntity() = Order(

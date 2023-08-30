@@ -143,10 +143,8 @@ class AxonFramework private constructor(private val applicationName: String, pri
         private val LOCK = Any()
         private val LOG = LoggerFactory.getLogger(AxonFramework::class.java)
 
-        val appConfig: Config by lazy { ConfigFactory.load() }
+        fun configure(name: String, appConfig: Config): AxonFramework = AxonFramework(name, appConfig)
 
-        private fun appConfig() = appConfig
-        fun configure(name: String, appConfig: Config = appConfig()): AxonFramework = AxonFramework(name, appConfig)
         fun Config?.isInspectorAxonConfigured(): Boolean = (this != null
                 && hasPath("workspace")
                 && hasPath("environment")

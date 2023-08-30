@@ -1,5 +1,6 @@
 package demo.scsc.commandside.order
 
+import com.typesafe.config.Config
 import demo.scsc.Constants
 import demo.scsc.api.productcatalog
 import demo.scsc.util.tx
@@ -9,14 +10,14 @@ import java.math.BigDecimal
 import java.util.*
 
 @ProcessingGroup(Constants.PROCESSING_GROUP_PRODUCT)
-class ProductValidation {
+class ProductValidation(private val appConfig: Config) {
 
     @EventHandler
     fun on(event: productcatalog.ProductUpdateReceivedEvent) {
-        tx { it.merge(event.toEntity()) }
+        tx(appConfig) { it.merge(event.toEntity()) }
     }
 
-    fun forProduct(id: UUID): ProductValidationInfo? = tx {
+    fun forProduct(id: UUID): ProductValidationInfo? = tx(appConfig) {
         it.find(Product::class.java, id)?.let { product -> ProductValidationInfo(product) }
     }
 

@@ -9,7 +9,7 @@ import jakarta.persistence.EntityManager
 import jakarta.persistence.NoResultException
 import org.axonframework.queryhandling.QueryExecutionException
 
-fun <RESULT> tx(config: Config = AxonFramework.appConfig, f: (EntityManager) -> RESULT): RESULT =
+fun <RESULT> tx(config: Config, f: (EntityManager) -> RESULT): RESULT =
     JpaPersistenceUnit.forName(SCSC, config)!!.newEntityManager.run {
         try {
             transaction.begin()
@@ -25,7 +25,7 @@ fun <RESULT> tx(config: Config = AxonFramework.appConfig, f: (EntityManager) -> 
 
 fun <QUERY, RESPONSE> answer(
     q: QUERY,
-    config: Config = AxonFramework.appConfig,
+    config: Config,
     f: (EntityManager) -> RESPONSE
 ): RESPONSE = try {
     f(JpaPersistenceUnit.forName(SCSC, config)!!.newEntityManager)

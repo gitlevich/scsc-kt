@@ -1,5 +1,6 @@
 package demo.scsc.queryside.warehouse
 
+import com.typesafe.config.Config
 import demo.scsc.Constants
 import demo.scsc.api.warehouse.GetShippingQueryResponse
 import demo.scsc.api.warehouse.GetShippingQueryResponse.ShippingItem
@@ -20,12 +21,13 @@ import org.slf4j.LoggerFactory
 import java.util.*
 
 @ProcessingGroup(Constants.PROCESSING_GROUP_WAREHOUSE)
-class ShipmentProjection {
+class ShipmentProjection(private val appConfig: Config) {
 
     @EventHandler
     fun on(event: ShipmentRequestedEvent, queryUpdateEmitter: QueryUpdateEmitter) {
-        tx { em ->
-            toEntities(event).forEach { product: ShipmentProduct ->
+        tx(appConfig) { em ->
+            event.toEntities().forEach { product: ShipmentProduct ->
+                println("persisting $product")
                 em.persist(product)
                 updateSubscribers(
                     shipmentId = product.id.shippingId,
@@ -38,10 +40,12 @@ class ShipmentProjection {
 
     @EventHandler
     fun on(event: ProductAddedToPackageEvent, queryUpdateEmitter: QueryUpdateEmitter) {
-        tx { em ->
+        tx(appConfig) { em ->
             val id = ShipmentProduct.Id(event.shipmentId, event.productId)
-            val shipmentProduct = em.find(ShipmentProduct::class.java, id)
-            em.remove(shipmentProduct)
+            println("product added to package. Removing it: $id")
+            em.find(ShipmentProduct::class.java, id)
+                ?.let { em.remove(it) }
+                ?: throw IllegalStateException("product $id not part of this shipment")
         }
         updateSubscribers(
             shipmentId = event.shipmentId,
@@ -68,7 +72,7 @@ class ShipmentProjection {
     }
 
     @QueryHandler(queryName = GET_SHIPPING_REQUESTS)
-    fun shippingRequests(): GetShippingQueryResponse = answer(GET_SHIPPING_REQUESTS) { em ->
+    fun shippingRequests(): GetShippingQueryResponse = answer(GET_SHIPPING_REQUESTS, appConfig) { em ->
         val shippingEntities = em.createQuery(
             "SELECT s FROM ShipmentProduct AS s ORDER BY s.id.shippingId",
             ShipmentProduct::class.java
@@ -89,12 +93,11 @@ class ShipmentProjection {
 
     @ResetHandler
     fun onReset() {
-        tx { it.createQuery("DELETE FROM ShipmentProduct").executeUpdate() }
+        tx(appConfig) { it.createQuery("DELETE FROM ShipmentProduct").executeUpdate() }
     }
 
-    private fun toEntities(event: ShipmentRequestedEvent): List<ShipmentProduct> =
-        event.products.map { productId -> ShipmentProduct(ShipmentProduct.Id(event.shipmentId, productId)) }
-            .toList()
+    private fun ShipmentRequestedEvent.toEntities(): List<ShipmentProduct> =
+        products.map { productId -> ShipmentProduct(ShipmentProduct.Id(shipmentId, productId)) }
 
     @MessageHandlerInterceptor(messageType = EventMessage::class)
     fun intercept(message: EventMessage<*>, interceptorChain: InterceptorChain) {

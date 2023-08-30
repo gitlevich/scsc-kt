@@ -1,5 +1,6 @@
 package demo.scsc.queryside.payment
 
+import com.typesafe.config.Config
 import demo.scsc.Constants.PROCESSING_GROUP_PAYMENT
 import demo.scsc.api.payment.GetPaymentForOrderQuery
 import demo.scsc.api.payment.GetPaymentForOrderQueryResponse
@@ -19,16 +20,16 @@ import org.slf4j.LoggerFactory
 import java.math.BigDecimal
 
 @ProcessingGroup(PROCESSING_GROUP_PAYMENT)
-class PaymentProjection {
+class PaymentProjection(private val appConfig: Config) {
 
     @EventHandler
     fun on(event: PaymentRequestedEvent) {
-        tx { it.persist(event.toEntity()) }
+        tx(appConfig) { it.persist(event.toEntity()) }
     }
 
     @EventHandler
     fun on(event: PaymentReceivedEvent) {
-        tx {
+        tx(appConfig) {
             it.find(Payment::class.java, event.orderPaymentId)?.let { payment ->
                 it.merge(payment.withPaidAmount(event.amount))
             }
@@ -37,7 +38,7 @@ class PaymentProjection {
 
     @QueryHandler
     fun on(query: GetPaymentForOrderQuery): GetPaymentForOrderQueryResponse =
-        answer(query) {
+        answer(query, appConfig) {
             val payment = it
                 .createQuery("SELECT p FROM Payment p WHERE p.orderId = :orderId", Payment::class.java)
                 .setParameter("orderId", query.orderId)
@@ -53,7 +54,7 @@ class PaymentProjection {
 
     @ResetHandler
     fun onReset(resetContext: ResetContext<*>) {
-        tx { it.createQuery("DELETE FROM Payment").executeUpdate() }
+        tx(appConfig) { it.createQuery("DELETE FROM Payment").executeUpdate() }
     }
 
     @MessageHandlerInterceptor(messageType = EventMessage::class)

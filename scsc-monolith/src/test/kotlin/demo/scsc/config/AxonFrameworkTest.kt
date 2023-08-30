@@ -17,7 +17,7 @@ class AxonFrameworkTest {
         @Test
         fun `should register custom parameter resolver factories if given any`() {
             val customParameterResolverFactories = listOf(UuidGenParameterResolverFactory())
-            val axonFramework = AxonFramework.configure("test")
+            val axonFramework = AxonFramework.configure("test", config)
                 .withCustomParameterResolverFactories(customParameterResolverFactories)
 
             val configuration = axonFramework.start()
@@ -34,7 +34,7 @@ class AxonFrameworkTest {
         @Test
         fun `should register no custom parameter resolver factories if given none`() {
             val axonFrameworkWithNoCustomResolverFactories =
-                AxonFramework.configure("test").withCustomParameterResolverFactories(emptyList())
+                AxonFramework.configure("test", config).withCustomParameterResolverFactories(emptyList())
 
             val configuration = axonFrameworkWithNoCustomResolverFactories.start()
             val multiParameterResolverFactory =

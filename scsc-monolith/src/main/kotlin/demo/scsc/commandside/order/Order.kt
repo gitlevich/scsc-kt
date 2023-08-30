@@ -1,5 +1,6 @@
 package demo.scsc.commandside.order
 
+import com.typesafe.config.Config
 import demo.scsc.api.order
 import demo.scsc.api.order.CompleteOrderCommand
 import demo.scsc.api.order.OrderCompletedEvent
@@ -29,8 +30,8 @@ class Order() {
     internal val items: MutableList<OrderItem> = mutableListOf()
 
     @CommandHandler
-    fun handle(command: order.CreateOrderCommand, nextUuid: () -> UUID = { UUID.randomUUID() }): UUID {
-        val productValidation = ProductValidation()
+    fun handle(command: order.CreateOrderCommand, config: Config, nextUuid: () -> UUID = { UUID.randomUUID() }): UUID {
+        val productValidation = ProductValidation(config)
         val orderItems = mutableListOf<OrderItem>()
         for (itemId in command.itemIds) {
             val info = productValidation.forProduct(itemId)

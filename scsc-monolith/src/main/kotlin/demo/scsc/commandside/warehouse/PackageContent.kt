@@ -17,6 +17,7 @@ import java.util.*
 
 class PackageContent(private val orderId: UUID, items: List<UUID>) {
     private val items: MutableMap<UUID, Boolean> = items.associateWith { false }.toMutableMap()
+
     fun ready(): Boolean = !items.containsValue(false)
 
     @CommandHandler

@@ -1,6 +1,7 @@
 package demo.scsc.queryside.order
 
 import jakarta.persistence.*
+import java.math.BigDecimal
 import java.util.*
 
 @Entity
@@ -26,4 +27,11 @@ data class Order (
     @CollectionTable(name = "order_items", joinColumns = [JoinColumn(name = "orderId")])
     @Column(name = "id")
     val items: List<OrderItem> = listOf()
+)
+
+@Embeddable
+data class OrderItem(
+    val id: UUID,
+    val name: String,
+    val price: BigDecimal
 )

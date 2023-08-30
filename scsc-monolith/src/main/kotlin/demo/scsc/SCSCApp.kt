@@ -1,5 +1,7 @@
 package demo.scsc
 
+import com.typesafe.config.Config
+import com.typesafe.config.ConfigFactory
 import demo.scsc.Constants.SCSC
 import demo.scsc.commandside.order.Order
 import demo.scsc.commandside.order.ProductValidation
@@ -17,7 +19,8 @@ import demo.scsc.queryside.shoppingcart.CartsProjection
 import demo.scsc.queryside.warehouse.ShipmentProjection
 
 fun main(args: Array<String>) {
-    AxonFramework.configure("$SCSC App")
+    val appConfig: Config = ConfigFactory.load()
+    AxonFramework.configure("$SCSC App", appConfig)
         .withJsonSerializer()
         .withJPATokenStoreIn(SCSC)
         .withAggregates(
@@ -28,12 +31,12 @@ fun main(args: Array<String>) {
         )
         .withJpaSagas(SCSC, OrderCompletionProcess::class.java)
         .withMessageHandlers(
-            ProductsProjection(),
+            ProductsProjection(appConfig),
             CartsProjection(),
-            OrdersProjection(),
-            ProductValidation(),
-            PaymentProjection(),
-            ShipmentProjection(),
+            OrdersProjection(appConfig),
+            ProductValidation(appConfig),
+            PaymentProjection(appConfig),
+            ShipmentProjection(appConfig),
             WheneverCheckoutIsIRequested()
         )
         .withCustomParameterResolverFactories(

@@ -3,18 +3,20 @@ package demo.thirdparty.inventory
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.readValue
+import com.typesafe.config.Config
+import com.typesafe.config.ConfigFactory
 import demo.scsc.config.AxonFramework.Companion.configure
 import org.axonframework.config.Configuration
 import java.io.IOException
 import javax.swing.SwingUtilities
 
-class InventorySystem {
+class InventorySystem(appConfig: Config) {
     private val axonFramework: Configuration
     private val inventory: List<InventoryProduct>
 
     init {
         inventory = initializeInventory()
-        axonFramework = configure("Inventory System")
+        axonFramework = configure("Inventory System", appConfig)
             .withJsonSerializer()
             .connectedToInspectorAxon()
             .start()
@@ -39,5 +41,5 @@ class InventorySystem {
 }
 
 fun main(args: Array<String>) {
-    InventorySystem()
+    InventorySystem(ConfigFactory.load())
 }
