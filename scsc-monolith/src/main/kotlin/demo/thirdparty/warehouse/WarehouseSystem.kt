@@ -41,6 +41,7 @@ class WarehouseSystem(appConfig: Config) {
     }
 }
 
+@Suppress("UNUSED_PARAMETER")
 fun main(args: Array<String>) {
     WarehouseSystem(ConfigFactory.load())
 }

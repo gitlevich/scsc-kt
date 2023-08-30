@@ -40,6 +40,7 @@ class InventorySystem(appConfig: Config) {
     }
 }
 
+@Suppress("UNUSED_PARAMETER")
 fun main(args: Array<String>) {
     InventorySystem(ConfigFactory.load())
 }

@@ -18,6 +18,7 @@ import demo.scsc.queryside.productcatalog.ProductsProjection
 import demo.scsc.queryside.shoppingcart.CartsProjection
 import demo.scsc.queryside.warehouse.ShipmentProjection
 
+@Suppress("UNUSED_PARAMETER")
 fun main(args: Array<String>) {
     val appConfig: Config = ConfigFactory.load()
     AxonFramework.configure("$SCSC App", appConfig)
