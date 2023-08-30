@@ -29,13 +29,9 @@ class PaymentProjection {
     @EventHandler
     fun on(event: PaymentReceivedEvent) {
         tx {
-            it.find(Payment::class.java, event.orderPaymentId)?.let { paymentEntity ->
-                var paid = paymentEntity.paidAmount!!
-                paid = paid.add(event.amount)
-                paymentEntity.paidAmount = paid
-                it.merge(paymentEntity)
+            it.find(Payment::class.java, event.orderPaymentId)?.let { payment ->
+                it.merge(payment.withPaidAmount(event.amount))
             }
-
         }
     }
 
@@ -48,10 +44,10 @@ class PaymentProjection {
                 .singleResult
 
             GetPaymentForOrderQueryResponse(
-                payment.id!!,
-                payment.orderId!!,
-                payment.requestedAmount!!,
-                payment.paidAmount!!
+                id = payment.id,
+                orderId = payment.orderId,
+                requestedAmount = payment.requestedAmount,
+                paidAmount = payment.paidAmount
             )
         }
 
@@ -69,11 +65,11 @@ class PaymentProjection {
     companion object {
         private val LOG = LoggerFactory.getLogger(PaymentProjection::class.java)
 
-        private fun PaymentRequestedEvent.toEntity() = Payment().apply {
-            id = orderPaymentId
-            orderId = this@toEntity.orderId
-            requestedAmount = amount
+        private fun PaymentRequestedEvent.toEntity() = Payment(
+            id = orderPaymentId,
+            orderId = orderId,
+            requestedAmount = amount,
             paidAmount = BigDecimal.ZERO
-        }
+        )
     }
 }

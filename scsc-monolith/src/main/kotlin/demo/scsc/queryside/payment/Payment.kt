@@ -10,17 +10,19 @@ import java.util.*
 
 @Entity
 @Table(name = Constants.PROCESSING_GROUP_PAYMENT)
-class Payment {
+data class Payment(
     @Id
     @Column(name = "id", nullable = false)
-    var id: UUID? = null
+    val id: UUID,
 
     @Column(unique = true)
-    var orderId: UUID? = null
+    val orderId: UUID,
 
     @Column(name = "due")
-    var requestedAmount: BigDecimal? = null
+    val requestedAmount: BigDecimal,
 
     @Column(name = "paid")
-    var paidAmount: BigDecimal? = null
+    val paidAmount: BigDecimal
+) {
+    fun withPaidAmount(amount: BigDecimal) = copy(paidAmount = paidAmount + amount)
 }

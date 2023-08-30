@@ -13,16 +13,15 @@ import org.slf4j.LoggerFactory
 
 @ProcessingGroup(Constants.PROCESSING_GROUP_CART)
 class CartsProjection {
+
     @EventHandler
     fun on(event: shoppingcart.CartCreatedEvent) {
-        val cartStore = CartStore()
-        cartStore.saveCart(event.owner, event.id)
+        CartStore().saveCart(event.owner, event.id)
     }
 
     @EventHandler
     fun on(event: shoppingcart.ProductAddedToCartEvent) {
-        val cartStore = CartStore()
-        cartStore.saveProduct(
+        CartStore().saveProduct(
             event.cartId,
             event.productId
         )
@@ -30,20 +29,17 @@ class CartsProjection {
 
     @EventHandler
     fun on(event: shoppingcart.ProductRemovedFromCartEvent) {
-        val cartStore = CartStore()
-        cartStore.removeProduct(event.cartId, event.productId)
+        CartStore().removeProduct(event.cartId, event.productId)
     }
 
     @EventHandler
     fun on(event: shoppingcart.CartAbandonedEvent) {
-        val cartStore = CartStore()
-        cartStore.removeCart(event.cartId)
+        CartStore().removeCart(event.cartId)
     }
 
     @EventHandler
     fun on(event: shoppingcart.CartCheckoutCompletedEvent) {
-        val cartStore = CartStore()
-        cartStore.removeCart(event.cartId)
+        CartStore().removeCart(event.cartId)
     }
 
     @QueryHandler
@@ -53,15 +49,11 @@ class CartsProjection {
     @ResetHandler
     fun onReset() {
         LOG.info("[    RESET ] ")
-        val cartStore = CartStore()
-        cartStore.reset()
+        CartStore().reset()
     }
 
     @MessageHandlerInterceptor(messageType = EventMessage::class)
-    fun intercept(
-        message: EventMessage<*>,
-        interceptorChain: InterceptorChain
-    ) {
+    fun intercept(message: EventMessage<*>, interceptorChain: InterceptorChain) {
         LOG.info("[    EVENT ] " + message.payload.toString())
         interceptorChain.proceed()
     }

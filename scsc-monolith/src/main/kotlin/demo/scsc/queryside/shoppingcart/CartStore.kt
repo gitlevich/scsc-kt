@@ -6,7 +6,7 @@ import one.microstream.storage.types.StorageManager
 import java.util.*
 
 class CartStore {
-    private val storageManager: StorageManager = forLocation("carts")!!
+    private val storageManager: StorageManager = forLocation("carts")
 
     fun saveCart(owner: String, cartId: UUID) {
         val cartsRoot = getCartsRoot(true)

@@ -30,24 +30,24 @@ class ProductsProjection {
                 .asSequence()
                 .map { productEntity ->
                     ProductInfo(
-                        productEntity.id!!,
-                        productEntity.name!!,
-                        productEntity.desc!!,
-                        productEntity.price!!,
-                        productEntity.image!!
+                        productEntity.id,
+                        productEntity.name,
+                        productEntity.desc,
+                        productEntity.price,
+                        productEntity.image
                     )
                 }
                 .toList()
         )
     }
 
-    private fun ProductUpdateReceivedEvent.toEntity() = CatalogProduct().also {
-        it.id = id
-        it.name = name
-        it.desc = desc
-        it.price = price
-        it.image = image
-    }
+    private fun ProductUpdateReceivedEvent.toEntity() = CatalogProduct(
+        id = id,
+        name = name,
+        desc = desc,
+        price = price,
+        image = image
+    )
 
     companion object {
         private const val GET_PRODUCTS_SQL = "SELECT p FROM ProductEntity AS p"

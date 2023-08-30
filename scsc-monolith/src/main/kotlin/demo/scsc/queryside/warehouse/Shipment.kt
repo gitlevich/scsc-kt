@@ -18,3 +18,6 @@ data class Shipment(
     @Column(name = "id")
     val items: List<ShipmentItem> = listOf()
 )
+
+@Embeddable
+data class ShipmentItem(val id: UUID)

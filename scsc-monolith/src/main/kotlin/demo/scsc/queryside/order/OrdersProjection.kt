@@ -8,7 +8,6 @@ import demo.scsc.api.order.OrderCompletedEvent
 import demo.scsc.api.order.OrderCreatedEvent
 import demo.scsc.api.payment.OrderFullyPaidEvent
 import demo.scsc.api.warehouse.PackageReadyEvent
-import demo.scsc.config.JpaPersistenceUnit.Companion.forName
 import demo.scsc.util.tx
 import org.axonframework.config.ProcessingGroup
 import org.axonframework.eventhandling.EventHandler
@@ -20,13 +19,12 @@ import org.axonframework.messaging.interceptors.MessageHandlerInterceptor
 import org.axonframework.queryhandling.QueryHandler
 import org.slf4j.LoggerFactory
 import java.math.BigDecimal
-import java.util.stream.Collectors
 
 @ProcessingGroup(Constants.PROCESSING_GROUP_ORDER)
 class OrdersProjection {
     @EventHandler
     fun on(orderCreatedEvent: OrderCreatedEvent) {
-        tx { it.persist(toEntity(orderCreatedEvent)) }
+        tx { it.persist(orderCreatedEvent.toEntity()) }
     }
 
     @EventHandler
@@ -54,35 +52,32 @@ class OrdersProjection {
     }
 
     @QueryHandler
-    fun getOrders(query: GetOrdersQuery): GetOrdersQueryResponse {
-        return tx {
-            val orderEntities = it
+    fun getOrders(query: GetOrdersQuery): GetOrdersQueryResponse = tx { entityManager ->
+        GetOrdersQueryResponse(
+            entityManager
                 .createQuery("SELECT p FROM Order AS p WHERE owner = ?1", Order::class.java)
                 .setParameter(1, query.owner)
                 .resultList
-            val response = GetOrdersQueryResponse(
-                orderEntities.stream()
-                    .map { orderEntity: Order ->
-                        orderEntity.items.stream().map(OrderItem::price)
-                            .reduce(BigDecimal.ZERO) { obj: BigDecimal?, augend: BigDecimal? -> obj?.add(augend) }
-                            ?.let { price ->
-                                GetOrdersQueryResponse.Order(
-                                    id = orderEntity.id,
-                                    total = price,
-                                    lines = orderEntity.items.stream()
-                                        .map { (_, name, price): OrderItem -> OrderLine(name, price) }
-                                        .collect(Collectors.toList()),
-                                    owner = orderEntity.owner,
-                                    isPaid = orderEntity.isPaid,
-                                    isPrepared = orderEntity.isPrepared,
-                                    isShipped = orderEntity.isReady
-                                )
-                            }
-                    }
-                    .collect(Collectors.toList())
-            )
-            response
-        }
+                .map { order: Order ->
+                    order.items
+                        .map { it.price }
+                        .fold(BigDecimal.ZERO) { r, c -> r.add(c) }
+                        .let { price ->
+                            GetOrdersQueryResponse.Order(
+                                id = order.id,
+                                total = price,
+                                lines = order.items
+                                    .map { (_, name, price) -> OrderLine(name, price) }
+                                    .toList(),
+                                owner = order.owner,
+                                isPaid = order.isPaid,
+                                isPrepared = order.isPrepared,
+                                isShipped = order.isReady
+                            )
+                        }
+                }
+                .toList()
+        )
     }
 
     @ResetHandler
@@ -90,10 +85,10 @@ class OrdersProjection {
         tx { it.createQuery("DELETE FROM Order").executeUpdate() }
     }
 
-    private fun toEntity(orderCreatedEvent: OrderCreatedEvent) = Order(
-        orderCreatedEvent.orderId,
-        orderCreatedEvent.owner,
-        items = orderCreatedEvent.items.map { item ->
+    private fun OrderCreatedEvent.toEntity() = Order(
+        id = orderId,
+        owner = owner,
+        items = items.map { item ->
             OrderItem(item.id, item.name, price = item.price)
         }
     )

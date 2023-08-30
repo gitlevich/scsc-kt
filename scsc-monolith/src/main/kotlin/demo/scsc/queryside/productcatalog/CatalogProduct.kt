@@ -9,20 +9,20 @@ import java.util.*
 
 @Entity
 @Table(name = "Products")
-class CatalogProduct {
+data class CatalogProduct (
     @Id
     @Column(name = "id", nullable = false)
-    var id: UUID? = null
+    val id: UUID,
 
     @Column
-    var name: String? = null
+    val name: String,
 
     @Column(name = "description")
-    var desc: String? = null
+    val desc: String,
 
     @Column
-    var price: BigDecimal? = null
+    val price: BigDecimal,
 
     @Column
-    var image: String? = null
-}
+    val image: String
+)

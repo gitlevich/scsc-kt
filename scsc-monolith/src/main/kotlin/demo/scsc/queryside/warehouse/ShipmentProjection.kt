@@ -24,13 +24,13 @@ class ShipmentProjection {
 
     @EventHandler
     fun on(event: ShipmentRequestedEvent, queryUpdateEmitter: QueryUpdateEmitter) {
-        tx {
+        tx { em ->
             toEntities(event).forEach { product: ShipmentProduct ->
-                it.persist(product)
+                em.persist(product)
                 updateSubscribers(
-                    product.id.shippingId,
-                    product.id.productId,
-                    queryUpdateEmitter
+                    shipmentId = product.id.shippingId,
+                    productId = product.id.productId,
+                    queryUpdateEmitter = queryUpdateEmitter
                 )
             }
         }
@@ -60,21 +60,19 @@ class ShipmentProjection {
         queryUpdateEmitter.emit(
             { subscriptionQueryMessage: SubscriptionQueryMessage<*, *, ShippingItem> -> GET_SHIPPING_REQUESTS == subscriptionQueryMessage.queryName },
             ShippingItem(
-                shipmentId,
-                productId,
-                removed
+                shipmentId = shipmentId,
+                productId = productId,
+                removed = removed
             )
         )
     }
 
     @QueryHandler(queryName = GET_SHIPPING_REQUESTS)
     fun shippingRequests(): GetShippingQueryResponse = answer(GET_SHIPPING_REQUESTS) { em ->
-        val shippingEntities = em
-            .createQuery(
-                "SELECT s FROM ShipmentProduct AS s ORDER BY s.id.shippingId",
-                ShipmentProduct::class.java
-            )
-            .resultList
+        val shippingEntities = em.createQuery(
+            "SELECT s FROM ShipmentProduct AS s ORDER BY s.id.shippingId",
+            ShipmentProduct::class.java
+        ).resultList
 
         GetShippingQueryResponse(
             shippingEntities

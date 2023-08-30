@@ -12,23 +12,23 @@ class JpaPersistenceUnit private constructor(persistenceUnit: String, config: Co
     private val entityManagerThreadLocal = ThreadLocal<EntityManager>()
 
     init {
-        val properties = mapOf("jakarta.persistence.jdbc.url" to config.getConfig("application.postgres").getString("url"))
+        val properties = mapOf(
+            "jakarta.persistence.jdbc.url" to config.getConfig("application.postgres").getString("url")
+        )
         emf = Persistence.createEntityManagerFactory(persistenceUnit, properties)
     }
 
     val threadLocalEntityManager: EntityManager?
-        get() {
-            var entityManager = entityManagerThreadLocal.get()
-            if (entityManager == null) {
-                entityManager = emf.createEntityManager()
-                entityManagerThreadLocal.set(entityManager)
-            }
-            return entityManager
+        get() = entityManagerThreadLocal.get() ?: emf.createEntityManager().also {
+            entityManagerThreadLocal.set(it)
         }
+
     val newEntityManager: EntityManager
         get() = emf.createEntityManager()
+
     val entityManagerProvider: EntityManagerProvider
         get() = JpaEntityManagerProvider(this)
+
     val transactionManager: TransactionManager
         get() = JpaTransactionManager(this)
 
