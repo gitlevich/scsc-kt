@@ -1,11 +1,13 @@
 package demo.scsc.commandside.shoppingcart
 
-import demo.scsc.api.order
-import demo.scsc.commandside.order.OrderTest
+import demo.scsc.Order.createOrderCommand
+import demo.scsc.Order.orderId
+import demo.scsc.ShoppingCart.cartCheckoutRequestedEvent
+import demo.scsc.ShoppingCart.completeCartCheckoutCommand
+import demo.scsc.ShoppingCart.handleCheckoutFailureCommand
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import org.axonframework.commandhandling.CommandExecutionException
 import org.axonframework.commandhandling.gateway.CommandGateway
 import org.junit.jupiter.api.Test
 import java.util.*
@@ -31,17 +33,6 @@ class WheneverCheckoutIsIRequestedTest {
         every { commandGateway.send<UUID>(createOrderCommand) } returns CompletableFuture.failedFuture(Exception("error"))
         policy.on(cartCheckoutRequestedEvent, commandGateway)
 
-        verify { commandGateway.send<UUID>(handleCartCheckoutFailureCommand) }
-    }
-
-    companion object {
-        private val orderId = UUID.randomUUID()
-        private val createOrderCommand = order.CreateOrderCommand(
-            owner = CartTest.addProductToCartCommand.owner,
-            itemIds = listOf(CartTest.addProductToCartCommand.productId)
-        )
-        private val cartCheckoutRequestedEvent = CartTest.cartCheckoutRequestedEvent
-        private val completeCartCheckoutCommand = CartTest.completeCartCheckoutCommand.copy(orderId = orderId)
-        private val handleCartCheckoutFailureCommand = CartTest.handleCheckoutFailureCommand
+        verify { commandGateway.send<UUID>(handleCheckoutFailureCommand) }
     }
 }

@@ -1,12 +1,15 @@
 package demo.scsc.commandside.payment
 
-import demo.scsc.api.payment
+import demo.scsc.Payment.orderFullyPaidEvent
+import demo.scsc.Payment.paymentReceivedEvent
+import demo.scsc.Payment.paymentRequestedEvent
+import demo.scsc.Payment.processPaymentCommand
+import demo.scsc.Payment.requestedPaymentCommand
 import org.assertj.core.api.Assertions.assertThat
 import org.axonframework.commandhandling.CommandExecutionException
 import org.axonframework.test.aggregate.AggregateTestFixture
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
-import java.util.*
 
 class OrderPaymentTest {
     private val payment = AggregateTestFixture(OrderPayment::class.java)
@@ -67,31 +70,5 @@ class OrderPaymentTest {
             .expectState { state ->
                 assert(state.paidAmount == paymentReceivedEvent.amount)
             }
-    }
-
-    companion object {
-        private val orderId = UUID.randomUUID()
-        private val requestedPaymentCommand = payment.RequestPaymentCommand(
-            orderPaymentId = UUID.randomUUID(),
-            orderId = orderId,
-            amount = BigDecimal.TEN
-        )
-        private val processPaymentCommand = payment.ProcessPaymentCommand(
-            orderPaymentId = requestedPaymentCommand.orderPaymentId,
-            amount = requestedPaymentCommand.amount
-        )
-        private val paymentRequestedEvent = payment.PaymentRequestedEvent(
-            orderPaymentId = requestedPaymentCommand.orderPaymentId,
-            orderId = requestedPaymentCommand.orderId,
-            amount = requestedPaymentCommand.amount
-        )
-        private val paymentReceivedEvent = payment.PaymentReceivedEvent(
-            orderPaymentId = requestedPaymentCommand.orderPaymentId,
-            amount = requestedPaymentCommand.amount
-        )
-        private val orderFullyPaidEvent = payment.OrderFullyPaidEvent(
-            orderPaymentId = requestedPaymentCommand.orderPaymentId,
-            orderId = requestedPaymentCommand.orderId
-        )
     }
 }

@@ -1,5 +1,19 @@
 package demo.scsc.commandside.shoppingcart
 
+import demo.scsc.ShoppingCart.abandonCartCommand
+import demo.scsc.ShoppingCart.addProductToCartCommand
+import demo.scsc.ShoppingCart.cartAbandonedEvent
+import demo.scsc.ShoppingCart.cartCheckoutCompletedEvent
+import demo.scsc.ShoppingCart.cartCheckoutRequestedEvent
+import demo.scsc.ShoppingCart.cartCreatedEvent
+import demo.scsc.ShoppingCart.cartId
+import demo.scsc.ShoppingCart.checkOutCartCommand
+import demo.scsc.ShoppingCart.checkoutFailedEvent
+import demo.scsc.ShoppingCart.completeCartCheckoutCommand
+import demo.scsc.ShoppingCart.handleCheckoutFailureCommand
+import demo.scsc.ShoppingCart.productAddedToCartEvent
+import demo.scsc.ShoppingCart.productRemovedFromCartEvent
+import demo.scsc.ShoppingCart.removeProductFromCartCommand
 import demo.scsc.api.shoppingcart
 import demo.scsc.commandside.shoppingcart.Cart.Companion.ABANDON_CART
 import demo.scsc.commandside.shoppingcart.Cart.Companion.abandonCartAfter
@@ -7,7 +21,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.axonframework.commandhandling.CommandExecutionException
 import org.axonframework.test.aggregate.AggregateTestFixture
 import org.junit.jupiter.api.Test
-import java.util.*
 
 class CartTest {
     private val cart = AggregateTestFixture(Cart::class.java).also {
@@ -121,57 +134,5 @@ class CartTest {
             )
             .`when`(handleCheckoutFailureCommand)
             .expectEvents(checkoutFailedEvent)
-    }
-
-
-    companion object {
-        private val cartId = UUID.fromString("00000000-0000-0000-0000-0c09a0d0d88e")
-
-        internal val addProductToCartCommand = shoppingcart.AddProductToCartCommand(
-            cartId = cartId,
-            productId = UUID.randomUUID(),
-            owner = "John Doe"
-        )
-        private val cartCreatedEvent = shoppingcart.CartCreatedEvent(
-            id = cartId,
-            owner = addProductToCartCommand.owner
-        )
-        private val productAddedToCartEvent = shoppingcart.ProductAddedToCartEvent(
-            cartId = cartId,
-            productId = addProductToCartCommand.productId
-        )
-
-        private val removeProductFromCartCommand = shoppingcart.RemoveProductFromCartCommand(
-            cartId = cartId,
-            productId = addProductToCartCommand.productId
-        )
-        private val productRemovedFromCartEvent = shoppingcart.ProductRemovedFromCartEvent(
-            cartId = cartId,
-            productId = addProductToCartCommand.productId
-        )
-
-        private val abandonCartCommand = shoppingcart.AbandonCartCommand(
-            cartId = cartId
-        )
-        private val cartAbandonedEvent = shoppingcart.CartAbandonedEvent(
-            cartId = cartId,
-            reason = shoppingcart.CartAbandonedEvent.Reason.TIMEOUT
-        )
-
-        private val checkOutCartCommand = shoppingcart.CheckOutCartCommand(cartId = cartId)
-        internal val cartCheckoutRequestedEvent = shoppingcart.CartCheckoutRequestedEvent(
-            cartId = cartId,
-            owner = addProductToCartCommand.owner,
-            products = listOf(addProductToCartCommand.productId)
-        )
-
-        internal val completeCartCheckoutCommand = shoppingcart.CompleteCartCheckoutCommand(
-            cartId = cartId,
-            orderId = UUID.randomUUID()
-        )
-        private val cartCheckoutCompletedEvent = shoppingcart.CartCheckoutCompletedEvent(cartId = cartId)
-
-        internal val handleCheckoutFailureCommand = shoppingcart.HandleCartCheckoutFailureCommand(cartId = cartId)
-        private val checkoutFailedEvent = shoppingcart.CartCheckoutFailedEvent(cartId = cartId)
     }
 }

@@ -1,13 +1,18 @@
 package demo.scsc.commandside.warehouse
 
-import demo.scsc.api.warehouse
+import demo.scsc.Order.orderId
+import demo.scsc.Warehouse.addProductToPackageCommand
+import demo.scsc.Warehouse.packageReadyEvent
+import demo.scsc.Warehouse.packageShippedEvent
+import demo.scsc.Warehouse.productAddedAToPackageEvent
+import demo.scsc.Warehouse.requestShipmentCommand
+import demo.scsc.Warehouse.shipPackageCommand
+import demo.scsc.Warehouse.shipmentRequestedEvent
+import demo.scsc.Warehouse.shipmentRequestedEventMessage
 import org.axonframework.commandhandling.CommandExecutionException
-import org.axonframework.eventhandling.DomainEventMessage
-import org.axonframework.eventhandling.GenericDomainEventMessage
 import org.axonframework.messaging.MetaData
 import org.axonframework.test.aggregate.AggregateTestFixture
 import org.junit.jupiter.api.Test
-import java.util.*
 
 class ShipmentTest {
     private val shipment = AggregateTestFixture(Shipment::class.java)
@@ -38,26 +43,5 @@ class ShipmentTest {
         shipment.given(shipmentRequestedEventMessage)
             .`when`(shipPackageCommand, MetaData.with("orderId", orderId))
             .expectException(CommandExecutionException::class.java)
-    }
-
-    companion object {
-        private val shipmentId = UUID.randomUUID()
-        private val orderId = UUID.randomUUID()
-        private val recipient = "John Doe"
-        private val products: List<UUID> = listOf(UUID.randomUUID())
-        private val requestShipmentCommand = warehouse.RequestShipmentCommand(shipmentId, orderId, recipient, products)
-        private val shipPackageCommand = warehouse.ShipPackageCommand(shipmentId)
-        private val shipmentRequestedEvent = warehouse.ShipmentRequestedEvent(shipmentId, recipient, products)
-        private val packageShippedEvent = warehouse.PackageShippedEvent(shipmentId)
-        private val addProductToPackageCommand = warehouse.AddProductToPackageCommand(shipmentId, products[0])
-        private val productAddedAToPackageEvent = warehouse.ProductAddedToPackageEvent(shipmentId, products[0])
-        private val packageReadyEvent = warehouse.PackageReadyEvent(shipmentId, orderId)
-        private val shipmentRequestedEventMessage: DomainEventMessage<warehouse.ShipmentRequestedEvent> =
-            GenericDomainEventMessage(
-                Shipment::class.java.name,
-                shipmentId.toString(),
-                0, // sequence number
-                shipmentRequestedEvent
-            ).andMetaData(MetaData.with("orderId", orderId))
     }
 }

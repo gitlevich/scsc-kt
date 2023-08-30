@@ -1,5 +1,8 @@
 package demo.scsc.commandside.order
 
+import demo.scsc.Order.completeOrderCommand
+import demo.scsc.Order.orderCompletedEvent
+import demo.scsc.Order.orderCreatedEvent
 import demo.scsc.api.order
 import org.assertj.core.api.Assertions.assertThat
 import org.axonframework.test.aggregate.AggregateTestFixture
@@ -18,22 +21,5 @@ class OrderTest {
             .expectState { order ->
                 assertThat(order.items).hasSize(1).isEqualTo(orderCreatedEvent.items)
             }
-    }
-
-    companion object {
-        private val orderId = UUID.randomUUID()
-        private val createOrderCommand = order.CreateOrderCommand(
-            owner = "owner",
-            itemIds = listOf(UUID.randomUUID())
-        )
-        private val orderCreatedEvent = order.OrderCreatedEvent(
-            orderId = orderId,
-            owner = createOrderCommand.owner,
-            items = createOrderCommand.itemIds.map {
-                order.OrderCreatedEvent.OrderItem(it, "name", BigDecimal.valueOf(1.0))
-            }
-        )
-        private val completeOrderCommand = order.CompleteOrderCommand(orderId)
-        private val orderCompletedEvent = order.OrderCompletedEvent(orderId = orderId)
     }
 }

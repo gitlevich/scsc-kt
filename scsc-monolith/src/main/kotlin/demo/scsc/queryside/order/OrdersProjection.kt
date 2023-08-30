@@ -23,6 +23,7 @@ import java.math.BigDecimal
 
 @ProcessingGroup(Constants.PROCESSING_GROUP_ORDER)
 class OrdersProjection(private val appConfig: Config) {
+
     @EventHandler
     fun on(orderCreatedEvent: OrderCreatedEvent) {
         tx(appConfig) { it.persist(orderCreatedEvent.toEntity()) }
