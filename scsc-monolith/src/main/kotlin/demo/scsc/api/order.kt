@@ -5,7 +5,7 @@ import java.math.BigDecimal
 import java.util.*
 
 object order {
-    data class CreateOrderCommand(val owner: String, val itemIds: List<UUID>)
+    data class CreateOrderCommand(@TargetAggregateIdentifier val orderId: UUID, val owner: String, val itemIds: List<UUID>)
     data class CompleteOrderCommand(@TargetAggregateIdentifier val orderId: UUID)
     data class GetOrdersQuery(val owner: String, val orderId: String) {
         data class GetOrdersQueryResponse(val orders: List<Order>) {

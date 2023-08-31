@@ -18,6 +18,7 @@ object Order {
     val product1: UUID = UUID.randomUUID()
     val owner: String = "John Doe"
     val createOrderCommand = order.CreateOrderCommand(
+        orderId = orderId,
         owner = owner,
         itemIds = listOf(product1)
     )

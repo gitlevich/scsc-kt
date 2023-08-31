@@ -12,10 +12,10 @@ class WheneverCheckoutIsIRequested {
 
     @DisallowReplay
     @EventHandler
-    fun on(event: shoppingcart.CartCheckoutRequestedEvent, commandGateway: CommandGateway) {
+    fun on(event: shoppingcart.CartCheckoutRequestedEvent, commandGateway: CommandGateway, nextUuid: () -> UUID = { UUID.randomUUID() }) {
         log.debug("[   POLICY ] Whenever car checkout is requested, create an order (cartId=t {})", event.cartId)
         try {
-            val orderId = commandGateway.send<UUID>(order.CreateOrderCommand(event.owner, event.products)).join()
+            val orderId = commandGateway.send<UUID>(order.CreateOrderCommand(nextUuid(), event.owner, event.products)).join()
             log.debug("[   POLICY ] Checkout is complete for cart {}", event.cartId)
             commandGateway.send<Unit>(shoppingcart.CompleteCartCheckoutCommand(event.cartId, orderId))
         } catch (e: Exception) {

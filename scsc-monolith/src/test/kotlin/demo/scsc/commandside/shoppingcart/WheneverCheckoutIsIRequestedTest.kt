@@ -22,7 +22,7 @@ class WheneverCheckoutIsIRequestedTest {
 
     @Test
     fun `should send CreateOrderCommand and CompleteCartCheckoutCommand on CartCheckoutRequestedEvent`() {
-        policy.on(cartCheckoutRequestedEvent, commandGateway)
+        policy.on(cartCheckoutRequestedEvent, commandGateway) { orderId }
 
         verify { commandGateway.send<UUID>(createOrderCommand) }
         verify { commandGateway.send<Unit>(completeCartCheckoutCommand) }

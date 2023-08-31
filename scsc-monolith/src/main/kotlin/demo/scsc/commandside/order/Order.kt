@@ -1,11 +1,11 @@
 package demo.scsc.commandside.order
 
-import com.typesafe.config.Config
 import demo.scsc.api.order
 import demo.scsc.api.order.CompleteOrderCommand
 import demo.scsc.api.order.OrderCompletedEvent
 import demo.scsc.api.order.OrderCreatedEvent
 import demo.scsc.api.order.OrderCreatedEvent.OrderItem
+import demo.scsc.config.resolver.ValidatorFactory
 import demo.scsc.infra.EmailService
 import jakarta.mail.MessagingException
 import org.axonframework.commandhandling.CommandHandler
@@ -30,25 +30,19 @@ class Order() {
     internal val items: MutableList<OrderItem> = mutableListOf()
 
     @CommandHandler
-    fun handle(command: order.CreateOrderCommand, config: Config, nextUuid: () -> UUID = { UUID.randomUUID() }): UUID {
-        val productValidation = ProductValidation(config)
+    constructor(
+        command: order.CreateOrderCommand,
+        orderItemValidatorFactory: ValidatorFactory<UUID, ProductValidation.ProductValidationInfo?>
+    ) : this() {
         val orderItems = mutableListOf<OrderItem>()
         for (itemId in command.itemIds) {
-            val info = productValidation.forProduct(itemId)
-                ?: throw IllegalStateException("No product validation available")
-            check(info.forSale) { "Product ${info.name} is no longer on sale" }
-            orderItems.add(OrderItem(itemId, info.name, info.price))
+            val validator = orderItemValidatorFactory.validator(itemId)
+                ?: throw IllegalStateException("No product validator available")
+            check(validator.forSale) { "Product ${validator.name} is no longer on sale" }
+            orderItems.add(OrderItem(itemId, validator.name, validator.price))
         }
 
-        val orderId = nextUuid()
-        applyEvent(
-            OrderCreatedEvent(
-                orderId = orderId,
-                owner = command.owner,
-                items = orderItems
-            )
-        )
-        return orderId
+        applyEvent(OrderCreatedEvent(command.orderId, command.owner, orderItems))
     }
 
     @CommandHandler
@@ -68,7 +62,7 @@ class Order() {
                 "Thank you for your order!\n\n$items"
             )
         } catch (e: MessagingException) {
-            e.printStackTrace()
+            LOG.error("Failed to send email", e)
         }
     }
 
