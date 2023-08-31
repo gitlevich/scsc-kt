@@ -3,7 +3,9 @@ package demo.scsc.api
 import org.axonframework.modelling.command.TargetAggregateIdentifier
 import java.util.*
 
+@Suppress("ClassName", "SpellCheckingInspection")
 object shoppingcart {
+
     data class AddProductToCartCommand(
         @TargetAggregateIdentifier val cartId: UUID,
         val owner: String,

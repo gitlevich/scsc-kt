@@ -3,7 +3,7 @@ package demo.scsc.queryside.payment
 import com.typesafe.config.Config
 import demo.scsc.Constants.PROCESSING_GROUP_PAYMENT
 import demo.scsc.api.payment.GetPaymentForOrderQuery
-import demo.scsc.api.payment.GetPaymentForOrderQueryResponse
+import demo.scsc.api.payment.GetPaymentForOrderQuery.GetPaymentForOrderQueryResponse
 import demo.scsc.api.payment.PaymentReceivedEvent
 import demo.scsc.api.payment.PaymentRequestedEvent
 import demo.scsc.util.tx

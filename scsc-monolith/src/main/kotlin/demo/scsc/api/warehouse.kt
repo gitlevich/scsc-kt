@@ -3,6 +3,7 @@ package demo.scsc.api
 import org.axonframework.modelling.command.TargetAggregateIdentifier
 import java.util.*
 
+@Suppress("ClassName")
 object warehouse {
     data class AddProductToPackageCommand(@TargetAggregateIdentifier val shipmentId: UUID, val productId: UUID)
 

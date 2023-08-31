@@ -3,8 +3,7 @@ package demo.scsc.queryside.productcatalog
 import com.typesafe.config.Config
 import demo.scsc.Constants
 import demo.scsc.api.productcatalog.ProductListQuery
-import demo.scsc.api.productcatalog.ProductListQueryResponse
-import demo.scsc.api.productcatalog.ProductListQueryResponse.ProductInfo
+import demo.scsc.api.productcatalog.ProductListQuery.ProductListQueryResponse
 import demo.scsc.api.productcatalog.ProductUpdateReceivedEvent
 import demo.scsc.util.answer
 import demo.scsc.util.tx
@@ -30,7 +29,7 @@ class ProductsProjection(private val appConfig: Config) {
                 .resultList
                 .asSequence()
                 .map { productEntity ->
-                    ProductInfo(
+                    ProductListQueryResponse.ProductInfo(
                         productEntity.id,
                         productEntity.name,
                         productEntity.desc,
