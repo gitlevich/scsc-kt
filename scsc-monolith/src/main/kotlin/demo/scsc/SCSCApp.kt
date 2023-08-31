@@ -10,7 +10,9 @@ import demo.scsc.commandside.shoppingcart.Cart
 import demo.scsc.commandside.shoppingcart.WheneverCheckoutIsIRequested
 import demo.scsc.commandside.warehouse.Shipment
 import demo.scsc.config.AxonFramework
-import demo.scsc.config.resolver.UuidGenParameterResolverFactory
+import demo.scsc.config.resolver.AppConfigResolverFactory
+import demo.scsc.config.resolver.UuidGenResolverFactory
+import demo.scsc.config.resolver.ValidatorResolverFactory
 import demo.scsc.process.OrderCompletionProcess
 import demo.scsc.queryside.order.OrdersProjection
 import demo.scsc.queryside.payment.PaymentProjection
@@ -21,6 +23,7 @@ import demo.scsc.queryside.warehouse.ShipmentProjection
 @Suppress("UNUSED_PARAMETER")
 fun main(args: Array<String>) {
     val appConfig: Config = ConfigFactory.load()
+    val productValidation = ProductValidation(appConfig)
     AxonFramework.configure("$SCSC App", appConfig)
         .withJsonSerializer()
         .withJPATokenStoreIn(SCSC)
@@ -35,14 +38,16 @@ fun main(args: Array<String>) {
             ProductsProjection(appConfig),
             CartsProjection(),
             OrdersProjection(appConfig),
-            ProductValidation(appConfig),
+            productValidation,
             PaymentProjection(appConfig),
             ShipmentProjection(appConfig),
             WheneverCheckoutIsIRequested()
         )
         .withCustomParameterResolverFactories(
             listOf(
-                UuidGenParameterResolverFactory(),
+                UuidGenResolverFactory(),
+                AppConfigResolverFactory(appConfig),
+                ValidatorResolverFactory(productValidation)
             )
         )
         .connectedToInspectorAxon()

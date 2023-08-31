@@ -7,7 +7,7 @@ import java.lang.reflect.Executable
 import java.lang.reflect.Parameter
 import java.util.*
 
-class UuidGenParameterResolverFactory : ParameterResolverFactory {
+class UuidGenResolverFactory : ParameterResolverFactory {
     override fun createInstance(
         executable: Executable,
         parameters: Array<out Parameter>,
