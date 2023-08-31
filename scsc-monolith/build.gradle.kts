@@ -1,3 +1,5 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+
 plugins {
     val kotlinGradlePluginVersion = "1.9.0"
     kotlin("jvm") version kotlinGradlePluginVersion
@@ -89,7 +91,7 @@ dependencies {
 
     tasks {
 
-        val main by creating(com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar::class) {
+        val main by creating(ShadowJar::class) {
             archiveBaseName.set("app")
             configurations = listOf(project.configurations.getByName("runtimeClasspath"))
             from(sourceSets.main.get().output)
@@ -98,7 +100,7 @@ dependencies {
             }
         }
 
-        val inventory by creating(com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar::class) {
+        val inventory by creating(ShadowJar::class) {
             archiveBaseName.set("inventory")
             configurations = listOf(project.configurations.getByName("runtimeClasspath"))
             from(sourceSets.main.get().output)
@@ -107,7 +109,7 @@ dependencies {
             }
         }
 
-        val warehouse by creating(com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar::class) {
+        val warehouse by creating(ShadowJar::class) {
             archiveBaseName.set("warehouse")
             configurations = listOf(project.configurations.getByName("runtimeClasspath"))
             from(sourceSets.main.get().output)
