@@ -4,7 +4,7 @@ import demo.scsc.Order.completeOrderCommand
 import demo.scsc.Order.createOrderCommand
 import demo.scsc.Order.orderCompletedEvent
 import demo.scsc.Order.orderCreatedEvent
-import demo.scsc.config.resolver.ValidatorFactory
+import demo.scsc.config.resolver.Validator
 import io.mockk.every
 import io.mockk.mockk
 import org.assertj.core.api.Assertions.assertThat
@@ -15,8 +15,8 @@ import java.util.*
 class OrderTest {
     private val order = AggregateTestFixture(Order::class.java).also {
         it.registerInjectableResource(
-            object : ValidatorFactory<UUID, ProductValidation.ProductValidationInfo?> {
-                override fun validator(subject: UUID): ProductValidation.ProductValidationInfo =
+            object : Validator<UUID, ProductValidation.ProductValidationInfo?> {
+                override fun invoke(subject: UUID): ProductValidation.ProductValidationInfo =
                     mockk<ProductValidation.ProductValidationInfo>(relaxed = true).also { validator ->
                         every { validator.name } returns orderCreatedEvent.items.first().name
                         every { validator.price } returns orderCreatedEvent.items.first().price

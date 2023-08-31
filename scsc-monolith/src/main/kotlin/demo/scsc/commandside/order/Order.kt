@@ -5,7 +5,7 @@ import demo.scsc.api.order.CompleteOrderCommand
 import demo.scsc.api.order.OrderCompletedEvent
 import demo.scsc.api.order.OrderCreatedEvent
 import demo.scsc.api.order.OrderCreatedEvent.OrderItem
-import demo.scsc.config.resolver.ValidatorFactory
+import demo.scsc.config.resolver.Validator
 import demo.scsc.infra.EmailService
 import jakarta.mail.MessagingException
 import org.axonframework.commandhandling.CommandHandler
@@ -32,11 +32,11 @@ class Order() {
     @CommandHandler
     constructor(
         command: order.CreateOrderCommand,
-        orderItemValidatorFactory: ValidatorFactory<UUID, ProductValidation.ProductValidationInfo?>
+        validatorFor: Validator<UUID, ProductValidation.ProductValidationInfo?>
     ) : this() {
         val orderItems = mutableListOf<OrderItem>()
         for (itemId in command.itemIds) {
-            val validator = orderItemValidatorFactory.validator(itemId)
+            val validator = validatorFor(itemId)
                 ?: throw IllegalStateException("No product validator available")
             check(validator.forSale) { "Product ${validator.name} is no longer on sale" }
             orderItems.add(OrderItem(itemId, validator.name, validator.price))

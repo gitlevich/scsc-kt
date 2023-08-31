@@ -3,15 +3,15 @@ package demo.scsc.commandside.order
 import com.typesafe.config.Config
 import demo.scsc.Constants
 import demo.scsc.api.productcatalog
-import demo.scsc.config.resolver.ValidatorFactory
+import demo.scsc.config.resolver.Validator
 import demo.scsc.util.tx
 import org.axonframework.config.ProcessingGroup
 import org.axonframework.eventhandling.EventHandler
 import java.math.BigDecimal
-import java.util.UUID
+import java.util.*
 
 @ProcessingGroup(Constants.PROCESSING_GROUP_PRODUCT)
-class ProductValidation(private val appConfig: Config): ValidatorFactory<UUID, ProductValidation.ProductValidationInfo?> {
+class ProductValidation(private val appConfig: Config) : Validator<UUID, ProductValidation.ProductValidationInfo?> {
 
     @EventHandler
     fun on(event: productcatalog.ProductUpdateReceivedEvent) {
@@ -31,8 +31,7 @@ class ProductValidation(private val appConfig: Config): ValidatorFactory<UUID, P
         val forSale: Boolean = product.isOnSale
     }
 
-    override fun validator(subject: UUID): ProductValidationInfo? =
-         tx(appConfig) {
-            it.find(Product::class.java, subject)?.let { product -> ProductValidationInfo(product) }
+    override fun invoke(subject: UUID): ProductValidationInfo? = tx(appConfig) {
+        it.find(Product::class.java, subject)?.let { product -> ProductValidationInfo(product) }
     }
 }
