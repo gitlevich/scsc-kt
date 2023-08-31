@@ -3,7 +3,7 @@ package demo.scsc.queryside.payment
 import com.typesafe.config.Config
 import demo.scsc.Constants.PROCESSING_GROUP_PAYMENT
 import demo.scsc.api.payment.GetPaymentForOrderQuery
-import demo.scsc.api.payment.GetPaymentForOrderQuery.GetPaymentForOrderQueryResponse
+import demo.scsc.api.payment.GetPaymentForOrderQuery.Response
 import demo.scsc.api.payment.PaymentReceivedEvent
 import demo.scsc.api.payment.PaymentRequestedEvent
 import demo.scsc.util.tx
@@ -37,14 +37,14 @@ class PaymentProjection(private val appConfig: Config) {
     }
 
     @QueryHandler
-    fun on(query: GetPaymentForOrderQuery): GetPaymentForOrderQueryResponse =
-        answer(query, appConfig) {
-            val payment = it
+    fun handle(query: GetPaymentForOrderQuery): Response =
+        answer(query, appConfig) { em ->
+            val payment = em
                 .createQuery("SELECT p FROM Payment p WHERE p.orderId = :orderId", Payment::class.java)
                 .setParameter("orderId", query.orderId)
                 .singleResult
 
-            GetPaymentForOrderQueryResponse(
+            Response(
                 id = payment.id,
                 orderId = payment.orderId,
                 requestedAmount = payment.requestedAmount,

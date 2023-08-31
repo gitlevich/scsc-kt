@@ -24,6 +24,7 @@ import demo.scsc.queryside.warehouse.ShipmentProjection
 fun main(args: Array<String>) {
     val appConfig: Config = ConfigFactory.load()
     val productValidation = ProductValidation(appConfig)
+
     AxonFramework.configure("$SCSC App", appConfig)
         .withJsonSerializer()
         .withJPATokenStoreIn(SCSC)

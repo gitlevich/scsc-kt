@@ -7,13 +7,14 @@
         <class>org.axonframework.eventhandling.tokenstore.jpa.TokenEntry</class>
         <class>org.axonframework.modelling.saga.repository.jpa.SagaEntry</class>
         <class>org.axonframework.modelling.saga.repository.jpa.AssociationValueEntry</class>
+        <class>demo.scsc.commandside.order.Product</class>
         <class>demo.scsc.queryside.productcatalog.CatalogProduct</class>
         <class>demo.scsc.queryside.order.Order</class>
         <class>demo.scsc.queryside.order.OrderItem</class>
         <class>demo.scsc.queryside.warehouse.Shipment</class>
         <class>demo.scsc.queryside.warehouse.ShipmentItem</class>
-        <class>demo.scsc.commandside.order.Product</class>
         <class>demo.scsc.queryside.warehouse.ShipmentProduct</class>
+        <class>demo.scsc.queryside.payment.Payment</class>
 
         <properties>
             <property name="jakarta.persistence.jdbc.driver" value="org.postgresql.Driver" /> <!-- DB Driver -->

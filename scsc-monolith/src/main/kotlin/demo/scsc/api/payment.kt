@@ -15,7 +15,7 @@ object payment {
     data class OrderFullyPaidEvent(val orderPaymentId: UUID, val orderId: UUID)
 
     data class GetPaymentForOrderQuery(val orderId: UUID) {
-        data class GetPaymentForOrderQueryResponse(
+        data class Response(
             val id: UUID,
             val orderId: UUID,
             val requestedAmount: BigDecimal,

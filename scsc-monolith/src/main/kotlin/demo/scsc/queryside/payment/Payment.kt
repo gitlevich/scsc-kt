@@ -1,6 +1,5 @@
 package demo.scsc.queryside.payment
 
-import demo.scsc.Constants
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.Id
@@ -9,7 +8,7 @@ import java.math.BigDecimal
 import java.util.*
 
 @Entity
-@Table(name = Constants.PROCESSING_GROUP_PAYMENT)
+@Table(name = "Payments")
 data class Payment(
     @Id
     @Column(name = "id", nullable = false)
