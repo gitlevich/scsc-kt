@@ -6,8 +6,6 @@ import demo.scsc.api.order.OrderCompletedEvent
 import demo.scsc.api.order.OrderCreatedEvent
 import demo.scsc.api.order.OrderCreatedEvent.OrderItem
 import demo.scsc.config.resolver.Validator
-import demo.scsc.infra.EmailService
-import jakarta.mail.MessagingException
 import org.axonframework.commandhandling.CommandHandler
 import org.axonframework.commandhandling.CommandMessage
 import org.axonframework.eventhandling.EventMessage
@@ -46,28 +44,19 @@ class Order() {
     }
 
     @CommandHandler
-    fun on(completeOrderCommand: CompleteOrderCommand) {
+    fun on(command: CompleteOrderCommand) {
         applyEvent(OrderCompletedEvent(orderId))
     }
 
     @EventSourcingHandler
-    fun on(orderCreatedEvent: OrderCreatedEvent) {
-        orderId = orderCreatedEvent.orderId
-        owner = orderCreatedEvent.owner
-        items.addAll(orderCreatedEvent.items)
-        if (isLive()) try {
-            EmailService.sendEmail(
-                owner,
-                "New order $orderId",
-                "Thank you for your order!\n\n$items"
-            )
-        } catch (e: MessagingException) {
-            LOG.error("Failed to send email", e)
-        }
+    fun on(event: OrderCreatedEvent) {
+        orderId = event.orderId
+        owner = event.owner
+        items.addAll(event.items)
     }
 
     @EventSourcingHandler
-    fun on(orderCompletedEvent: OrderCompletedEvent) {
+    fun on(event: OrderCompletedEvent) {
         markDeleted()
     }
 

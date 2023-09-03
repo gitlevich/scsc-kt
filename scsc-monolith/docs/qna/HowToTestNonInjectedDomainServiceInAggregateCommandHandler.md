@@ -1,5 +1,15 @@
 ## Q: How to test an aggregate command handler with a non-injected dependency?
 
+**Note:**
+I proposed an alternative solution I like more: Cart aggregate doesn't create Order, instead a 
+`WheneverCheckoutIsRequested` policy does the job on `CartCheckoutRequestedEvent`, sending a new
+`CreateOrderCommand`. I changed `Order` to have a `@commandHandler` constructor that takes both the 
+command and the `ProductValidation` dependency. This way, the dependency is injected and can be mocked.
+I worked around potential architecture violation flagged by the architecture test by segregating the
+domain service interface of that `Validator`. I still have qualms about the design: `OrderValidation`
+class bothers me, but I don't have a better idea yet.
+
+**Issue:**
 The snippet below instantiates what appears to be a domain service in the Order aggregate constructor:
 
 ```
