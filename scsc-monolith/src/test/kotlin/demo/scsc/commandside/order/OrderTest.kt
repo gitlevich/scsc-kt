@@ -13,17 +13,38 @@ import org.junit.jupiter.api.Test
 import java.util.*
 
 class OrderTest {
+    private val productValidator = mockk<ProductValidation.ProductValidationInfo>(relaxed = true)
+        .also { validator ->
+            every { validator.name } returns orderCreatedEvent.items.first().name
+            every { validator.price } returns orderCreatedEvent.items.first().price
+            every { validator.forSale } returns true
+        }
+
     private val order = AggregateTestFixture(Order::class.java).also {
         it.registerInjectableResource(
             object : Validator<UUID, ProductValidation.ProductValidationInfo?> {
-                override fun invoke(subject: UUID): ProductValidation.ProductValidationInfo =
-                    mockk<ProductValidation.ProductValidationInfo>(relaxed = true).also { validator ->
-                        every { validator.name } returns orderCreatedEvent.items.first().name
-                        every { validator.price } returns orderCreatedEvent.items.first().price
-                        every { validator.forSale } returns true
-                    }
+                override fun invoke(subject: UUID): ProductValidation.ProductValidationInfo = productValidator
             }
         )
+    }
+
+    @Test
+    fun `should create order on CreateOrderCommand`() {
+        order.givenNoPriorActivity()
+            .`when`(createOrderCommand)
+            .expectEvents(orderCreatedEvent)
+            .expectState { order ->
+                assertThat(order.items).hasSize(1).isEqualTo(orderCreatedEvent.items)
+            }
+    }
+
+    @Test
+    fun `should refuse to create order when an order item is no longer for sale on CreateOrderCommand`() {
+        every { productValidator.forSale } returns false
+
+        order.givenNoPriorActivity()
+            .`when`(createOrderCommand)
+            .expectException(IllegalStateException::class.java)
     }
 
     @Test
