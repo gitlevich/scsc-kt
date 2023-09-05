@@ -1,6 +1,7 @@
 package demo.scsc
 
 import demo.scsc.Order.createOrderCommand
+import demo.scsc.Order.orderCreatedEvent
 import demo.scsc.Order.orderId
 import demo.scsc.api.order
 import demo.scsc.api.payment
@@ -114,9 +115,17 @@ object Warehouse {
     private val shipmentId: UUID = UUID.randomUUID()
     private val recipient: String = createOrderCommand.owner
     private val products: List<UUID> = listOf(Order.product1)
+    private val orderPaymentId = UUID.randomUUID()
     val requestShipmentCommand = warehouse.RequestShipmentCommand(
         shipmentId,
         orderId, recipient, products
+    )
+    val requestPaymentCommand = payment.RequestPaymentCommand(
+        orderPaymentId = orderPaymentId,
+        orderId = orderCreatedEvent.orderId,
+        amount = orderCreatedEvent.items.asSequence()
+            .map { it.price }
+            .reduce { acc, c -> acc.add(c) }
     )
     val shipPackageCommand = warehouse.ShipPackageCommand(shipmentId)
     val shipmentRequestedEvent = warehouse.ShipmentRequestedEvent(shipmentId, recipient, products)

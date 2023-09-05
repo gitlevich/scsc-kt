@@ -17,13 +17,12 @@ import org.axonframework.messaging.InterceptorChain
 import org.axonframework.messaging.interceptors.MessageHandlerInterceptor
 import org.axonframework.modelling.saga.EndSaga
 import org.axonframework.modelling.saga.SagaEventHandler
-import org.axonframework.modelling.saga.SagaLifecycle.*
+import org.axonframework.modelling.saga.SagaLifecycle.associateWith
 import org.axonframework.modelling.saga.StartSaga
 import org.slf4j.LoggerFactory
-import java.math.BigDecimal
 import java.util.*
-import java.util.stream.Collectors
 
+@Suppress("UNUSED_PARAMETER")
 class OrderCompletionProcess {
     lateinit var orderId: UUID
 
@@ -69,9 +68,7 @@ class OrderCompletionProcess {
     @SagaEventHandler(keyName = "orderId", associationProperty = "orderId")
     fun on(event: OrderFullyPaidEvent, commandGateway: CommandGateway) {
         isPaid = true
-        if (isShipmentReady) {
-            commandGateway.send<Any>(ShipPackageCommand(shipmentId))
-        }
+        if (isShipmentReady) commandGateway.send<Any>(ShipPackageCommand(shipmentId))
     }
 
     @SagaEventHandler(keyName = "shipmentId", associationProperty = "shipmentId")
@@ -94,18 +91,17 @@ class OrderCompletionProcess {
 
     companion object {
         private val LOG = LoggerFactory.getLogger(OrderCompletionProcess::class.java)
-        private fun <T> errorHandlingCallback(): CommandCallback<T, Any> {
-            return CommandCallback { command: CommandMessage<out T>?, response: CommandResultMessage<*> ->
+        private fun <T> errorHandlingCallback(): CommandCallback<T, Any> =
+            CommandCallback { _: CommandMessage<out T>?, response: CommandResultMessage<*> ->
                 if (response.isExceptional) {
                     /*
-                options to handle command processing errors
-                 - schedule a retry
-                 - send another command
-                 - publish an event
-             */
+                        options to handle command processing errors
+                         - schedule a retry
+                         - send another command
+                         - publish an event
+                     */
                     response.exceptionResult().printStackTrace()
                 }
             }
-        }
     }
 }

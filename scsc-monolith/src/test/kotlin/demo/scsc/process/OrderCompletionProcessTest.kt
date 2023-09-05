@@ -1,5 +1,14 @@
 package demo.scsc.process
 
+import demo.scsc.Order.completeOrderCommand
+import demo.scsc.Order.createOrderCommand
+import demo.scsc.Order.orderCreatedEvent
+import demo.scsc.Payment.orderFullyPaidEvent
+import demo.scsc.Warehouse.packageReadyEvent
+import demo.scsc.Warehouse.packageShippedEvent
+import demo.scsc.Warehouse.requestPaymentCommand
+import demo.scsc.Warehouse.requestShipmentCommand
+import demo.scsc.Warehouse.shipPackageCommand
 import demo.scsc.api.order
 import demo.scsc.api.payment
 import demo.scsc.api.warehouse
@@ -17,8 +26,9 @@ class OrderCompletionProcessTest {
     @BeforeEach
     fun setUp() {
         val nextUuid: () -> UUID = mockk<() -> UUID>(relaxed = true).also {
-            // Note: order is significant and must match the order in which nextId() is called in the saga
-            with(listOf(orderPaymentId, shipmentId).iterator()) {
+            // Note: order is significant and must match the order in which nextId() is called in the saga's
+            // on(OrderCreatedEvent) handler
+            with(listOf(requestPaymentCommand.orderPaymentId, requestShipmentCommand.shipmentId).iterator()) {
                 every { it.invoke() } returns next() andThen next()
             }
         }
@@ -37,8 +47,8 @@ class OrderCompletionProcessTest {
     fun `should associate saga with order id and shipment id on OrderCreatedEvent`() {
         process.givenNoPriorActivity()
             .whenPublishingA(orderCreatedEvent)
-            .expectAssociationWith("orderId", orderId.toString())
-            .expectAssociationWith("shipmentId", shipmentId.toString())
+            .expectAssociationWith("orderId", createOrderCommand.orderId.toString())
+            .expectAssociationWith("shipmentId", requestShipmentCommand.shipmentId.toString())
     }
 
     @Test
@@ -51,37 +61,42 @@ class OrderCompletionProcessTest {
             )
     }
 
-    companion object {
-        private val orderId = UUID.randomUUID()
-        private val orderCreatedEvent = order.OrderCreatedEvent(
-            orderId = orderId,
-            owner = "John Doe",
-            items = listOf(
-                order.OrderCreatedEvent.OrderItem(
-                    id = UUID.randomUUID(),
-                    name = "Test Item",
-                    price = BigDecimal("9.99")
-                )
-            )
-        )
+    @Test
+    fun `should dispatch ShipPackageCommand on PackageReadyEven if OrderFullyPaidEvent has been received`() {
+        process.givenAPublished(orderCreatedEvent)
+            .andThenAPublished(orderFullyPaidEvent)
+            .whenPublishingA(packageReadyEvent)
+            .expectDispatchedCommands(shipPackageCommand)
+    }
 
-        private val orderPaymentId = UUID.randomUUID()
-        private val requestPaymentCommand = payment.RequestPaymentCommand(
-            orderPaymentId = orderPaymentId,
-            orderId = orderCreatedEvent.orderId,
-            amount = orderCreatedEvent.items.asSequence()
-                .map { it.price }
-                .reduce { acc, c -> acc.add(c) }
-        )
+    @Test
+    fun `should not dispatch ShipPackageCommand on PackageReadyEven if order has not been fully paid`() {
+        process.givenAPublished(orderCreatedEvent)
+            .whenPublishingA(packageReadyEvent)
+            .expectNoDispatchedCommands()
+    }
 
-        private val shipmentId = UUID.randomUUID()
-        private val requestShipmentCommand = warehouse.RequestShipmentCommand(
-            shipmentId = shipmentId,
-            orderId = orderCreatedEvent.orderId,
-            recipient = orderCreatedEvent.owner,
-            products = orderCreatedEvent.items.asSequence()
-                .map { it.id }
-                .toList()
-        )
+    @Test
+    fun `should not dispatch ShipPackageCommand on OrderFullyPaidEvent if package is not ready`() {
+        process.givenAPublished(orderCreatedEvent)
+            .whenPublishingA(orderFullyPaidEvent)
+            .expectNoDispatchedCommands()
+    }
+
+    @Test
+    fun `should dispatch ShipPackageCommand on OrderFullyPaidEvent if PackageReadyEven has been received`() {
+        process.givenAPublished(orderCreatedEvent)
+            .andThenAPublished(packageReadyEvent)
+            .whenPublishingA(orderFullyPaidEvent)
+            .expectDispatchedCommands(shipPackageCommand)
+    }
+
+    @Test
+    fun `should dispatch CompleteOrderCommand on PackageShippedEvent`() {
+        process.givenAPublished(orderCreatedEvent)
+            .andThenAPublished(orderFullyPaidEvent)
+            .andThenAPublished(packageReadyEvent)
+            .whenPublishingA(packageShippedEvent)
+            .expectDispatchedCommands(completeOrderCommand)
     }
 }
