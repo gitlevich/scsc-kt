@@ -1,7 +1,7 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 
 plugins {
-    val kotlinGradlePluginVersion = "1.9.0"
+    val kotlinGradlePluginVersion = "1.9.10"
     val shadowPluginVersion = "7.0.0"
     kotlin("jvm") version kotlinGradlePluginVersion
     kotlin("plugin.noarg") version kotlinGradlePluginVersion
@@ -35,7 +35,7 @@ repositories {
     maven { url = uri("https://plugins.gradle.org/m2/") }
 }
 
-val kotlinVersion = "1.9.0"
+val kotlinVersion = "1.9.10"
 val kotlinCoroutinesVersion = "1.7.3"
 val axonVersion = "4.7.4"
 val kotlinAxonExtVersion = "4.8.0"
