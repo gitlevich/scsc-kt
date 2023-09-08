@@ -18,12 +18,13 @@ and thus their attribution to [Milen Dyankov](https://github.com/azzazzel) is lo
 reiterate his authorship of the code here.
 
 Next steps:
-- add tests for all the reference scenarios
-- refactor it to a more idiomatic Kotlin
-- see how query side looks with Kotlin frameworks like Ktor, Exposed, etc. 
-- see how it all looks with coroutines
+- add tests to understand what works, as well to support refactoring
+- refactor it to a more idiomatic Kotlin (original "translation" was done by IntelliJ)
+- see how it looks with Kotlin frameworks like Ktor, maybe Exposed, etc. 
+- expose commands via HTTP endpoints (I can see the UI Vue client attempts to connect to 8080, but I don't see the app listening...)
+- expose queries via HTTP endpoints (consider streaming, e.g., Kotlin flows mated to Axon streaming queries)
+- try the plain Kotlin coroutines option end to end: should both look and work nicely, and not scare people who dislike functional style.
 - draw context map with respective aggregate roots, etc. 
-- add "narratives", that is reference scenarios told as command/event or policy/command sequences 
 - ???
 
 ### [Implementation details](docs/ImplementationDetails.md)
