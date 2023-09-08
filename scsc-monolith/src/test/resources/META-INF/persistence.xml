@@ -15,6 +15,7 @@
         <class>demo.scsc.queryside.warehouse.ShipmentItem</class>
         <class>demo.scsc.queryside.warehouse.ShipmentProduct</class>
         <class>demo.scsc.queryside.payment.Payment</class>
+        <class>demo.scsc.queryside.productcatalog.CatalogProduct</class>
 
         <properties>
             <property name="hibernate.hbm2ddl.auto" value="update" />

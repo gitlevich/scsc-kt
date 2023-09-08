@@ -8,7 +8,7 @@ import java.math.BigDecimal
 import java.util.*
 
 @Entity
-@Table(name = "Products")
+@Table(name = "CatalogProduct")
 data class CatalogProduct (
     @Id
     @Column(name = "id", nullable = false)

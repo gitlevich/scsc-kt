@@ -9,6 +9,8 @@ import demo.scsc.util.answer
 import demo.scsc.util.tx
 import org.axonframework.config.ProcessingGroup
 import org.axonframework.eventhandling.EventHandler
+import org.axonframework.eventhandling.ResetHandler
+import org.axonframework.eventhandling.replay.ResetContext
 import org.axonframework.queryhandling.QueryHandler
 
 @ProcessingGroup(Constants.PROCESSING_GROUP_PRODUCT)
@@ -30,15 +32,20 @@ class ProductsProjection(private val appConfig: Config) {
                 .asSequence()
                 .map { productEntity ->
                     ProductListQueryResponse.ProductInfo(
-                        productEntity.id,
-                        productEntity.name,
-                        productEntity.desc,
-                        productEntity.price,
-                        productEntity.image
+                        id = productEntity.id,
+                        name = productEntity.name,
+                        desc = productEntity.desc,
+                        price = productEntity.price,
+                        image = productEntity.image
                     )
                 }
                 .toList()
         )
+    }
+
+    @ResetHandler
+    fun onReset(resetContext: ResetContext<*>?) {
+        tx(appConfig) { it.createQuery("DELETE FROM CatalogProduct").executeUpdate() }
     }
 
     private fun ProductUpdateReceivedEvent.toEntity() = CatalogProduct(
@@ -50,7 +57,7 @@ class ProductsProjection(private val appConfig: Config) {
     )
 
     companion object {
-        private const val GET_PRODUCTS_SQL = "SELECT p FROM ProductEntity AS p"
-        private fun getProductsSql(sortBy: String): String = "$GET_PRODUCTS_SQL ORDER BY $sortBy"
+        private const val GET_PRODUCTS_SQL = "SELECT p FROM CatalogProduct AS p"
+        private fun getProductsSql(sortBy: ProductListQuery.SortBy): String = "$GET_PRODUCTS_SQL ORDER BY ${sortBy.value}"
     }
 }
