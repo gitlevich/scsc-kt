@@ -53,6 +53,14 @@ so we will not incorporate it into our shopping story. We will deal with it sepa
 So now, we have our Shopping narrative in its Shopping context, and two other black boxes that we know we need, 
 but for the purposes of telling the shopping story, we don't care about their internal structure.
 
+***Context sniff test***
+```text
+Question: does that narrative belong to this context?
 
-
-
+ In a context, we tell a single story. Adding another narrative to a story adds details. Details are a kind of complication. 
+ If these details clarify and improve the story, the narrative fits. If details obscure the focus instead, it doesn't. 
+ If we need to mention it at all, we use an opaque reference, like a quote. A story can become richer by referencing another
+ book, but it is unlikely to benefit by embedding it.
+ 
+ We need to reference another context when somehow we need something from it. 
+```
