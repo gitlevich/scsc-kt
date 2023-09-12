@@ -1,4 +1,4 @@
-package demo.scsc.queryside.productcatalog
+package demo.scsc.queryside.inventory
 
 import com.typesafe.config.ConfigFactory
 import demo.scsc.*

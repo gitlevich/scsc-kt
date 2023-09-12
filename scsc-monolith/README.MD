@@ -12,7 +12,8 @@ over the last few years.
 
 I don't have answers to many of these questions, and hope this project will help me find them. 
 
-At the moment, this is a verbatim port of the Java implementation. 
+At the moment, this is a verbatim port of SCSC monolith Java implementation.
+
 Because I _replaced_ the original Java files with their Kotlin equivalents, the commit history,
 and thus their attribution to [Milen Dyankov](https://github.com/azzazzel) is lost, so I want to 
 reiterate his authorship of the code here.
@@ -26,6 +27,10 @@ Next steps:
 - try the plain Kotlin coroutines option end to end: should both look and work nicely, and not scare people who dislike functional style.
 - draw context map with respective aggregate roots, etc. 
 - ???
+
+### [Reference scenarios](docs/ReferenceScenarios.md)
+
+### [Context map](docs/ContextMap.md)
 
 ### [Implementation details](docs/ImplementationDetails.md)
 

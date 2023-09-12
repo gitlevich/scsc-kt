@@ -1,4 +1,4 @@
-package demo.scsc.queryside.warehouse
+package demo.scsc.queryside.shipment
 
 import com.typesafe.config.Config
 import demo.scsc.Constants

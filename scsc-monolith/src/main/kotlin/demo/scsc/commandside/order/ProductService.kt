@@ -3,7 +3,7 @@ package demo.scsc.commandside.order
 import com.typesafe.config.Config
 import demo.scsc.Constants
 import demo.scsc.api.productcatalog
-import demo.scsc.config.resolver.Validator
+import demo.scsc.config.resolver.Finder
 import demo.scsc.util.tx
 import org.axonframework.config.ProcessingGroup
 import org.axonframework.eventhandling.EventHandler
@@ -11,7 +11,7 @@ import java.math.BigDecimal
 import java.util.*
 
 @ProcessingGroup(Constants.PROCESSING_GROUP_PRODUCT)
-class ProductValidation(private val appConfig: Config) : Validator<UUID, ProductValidation.ProductValidationInfo?> {
+class ProductService(private val appConfig: Config) : Finder<UUID, ProductService.ProductDescription?> {
 
     @EventHandler
     fun on(event: productcatalog.ProductUpdateReceivedEvent) {
@@ -22,16 +22,16 @@ class ProductValidation(private val appConfig: Config) : Validator<UUID, Product
         id = id,
         name = name,
         price = price,
-        isOnSale = onSale
+        isInStock = onSale
     )
 
-    class ProductValidationInfo(product: Product) {
+    class ProductDescription(product: Product) {
         val name: String = product.name
         val price: BigDecimal = product.price // TODO switch to monetary amount
-        val forSale: Boolean = product.isOnSale
+        val inStock: Boolean = product.isInStock
     }
 
-    override fun invoke(subject: UUID): ProductValidationInfo? = tx(appConfig) {
-        it.find(Product::class.java, subject)?.let { product -> ProductValidationInfo(product) }
+    override fun invoke(subject: UUID): ProductDescription? = tx(appConfig) {
+        it.find(Product::class.java, subject)?.let { product -> ProductDescription(product) }
     }
 }

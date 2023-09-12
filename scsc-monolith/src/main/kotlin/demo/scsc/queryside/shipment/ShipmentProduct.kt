@@ -1,4 +1,4 @@
-package demo.scsc.queryside.warehouse
+package demo.scsc.queryside.shipment
 
 import jakarta.persistence.Embeddable
 import jakarta.persistence.EmbeddedId

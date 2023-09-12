@@ -7,7 +7,7 @@ import java.nio.file.Paths
 @Suppress("SpellCheckingInspection")
 object MicrostreamStore {
     private val BASE_STORAGE_PATH = Paths.get(System.getProperty("java.io.tmpdir"), "SCSC")
-    private val managers: MutableMap<String, StorageManager> = HashMap()
+    private val managers: MutableMap<String, StorageManager> = mutableMapOf()
 
     @Synchronized
     fun forLocation(location: String): StorageManager =

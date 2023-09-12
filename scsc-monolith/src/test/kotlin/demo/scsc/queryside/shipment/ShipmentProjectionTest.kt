@@ -1,4 +1,4 @@
-package demo.scsc.queryside.warehouse
+package demo.scsc.queryside.shipment
 
 import com.typesafe.config.ConfigFactory
 import demo.scsc.api.warehouse

@@ -9,15 +9,11 @@ import demo.scsc.Warehouse.packageShippedEvent
 import demo.scsc.Warehouse.requestPaymentCommand
 import demo.scsc.Warehouse.requestShipmentCommand
 import demo.scsc.Warehouse.shipPackageCommand
-import demo.scsc.api.order
-import demo.scsc.api.payment
-import demo.scsc.api.warehouse
 import io.mockk.every
 import io.mockk.mockk
 import org.axonframework.test.saga.SagaTestFixture
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.math.BigDecimal
 import java.util.*
 
 class OrderCompletionProcessTest {

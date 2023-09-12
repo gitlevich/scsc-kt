@@ -21,5 +21,5 @@ data class Product(
     val price: BigDecimal, // TODO switch to monetary amount
 
     @Column
-    val isOnSale: Boolean
+    val isInStock: Boolean
 )

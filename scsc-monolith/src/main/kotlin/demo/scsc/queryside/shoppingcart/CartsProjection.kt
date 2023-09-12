@@ -16,6 +16,10 @@ class CartsProjection {
 
     private val cartStore = CartStore()
 
+    @QueryHandler
+    fun handle(query: shoppingcart.GetCartQuery): shoppingcart.GetCartQuery.Response? =
+        cartStore.getOwnersCarts(query.owner)
+
     @EventHandler
     fun on(event: shoppingcart.CartCreatedEvent) {
         cartStore.saveCart(event.owner, event.id)
@@ -43,10 +47,6 @@ class CartsProjection {
     fun on(event: shoppingcart.CartCheckoutCompletedEvent) {
         cartStore.removeCart(event.cartId)
     }
-
-    @QueryHandler
-    fun handle(query: shoppingcart.GetCartQuery): shoppingcart.GetCartQuery.Response? =
-        cartStore.getOwnersCarts(query.owner)
 
     @ResetHandler
     fun onReset() {

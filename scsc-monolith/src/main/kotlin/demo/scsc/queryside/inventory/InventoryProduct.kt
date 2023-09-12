@@ -1,4 +1,4 @@
-package demo.scsc.queryside.productcatalog
+package demo.scsc.queryside.inventory
 
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
@@ -8,8 +8,8 @@ import java.math.BigDecimal
 import java.util.*
 
 @Entity
-@Table(name = "CatalogProduct")
-data class CatalogProduct (
+@Table(name = "InventoryProduct")
+data class InventoryProduct (
     @Id
     @Column(name = "id", nullable = false)
     val id: UUID,

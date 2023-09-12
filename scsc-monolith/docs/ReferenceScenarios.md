@@ -1,6 +1,6 @@
 # Reference Scenarios
 
-## Scenario 1: Shopping cart lifecycle
+## Shopping cart lifecycle
 The user should be able to add products to the cart and eventually check out. 
 The result of a checkout should be a new Order.
 The cart should timeout after a period of inactivity to avoid being overwhelmed with abandoned carts.
@@ -22,5 +22,10 @@ Whenever the package is shipped:
 - the Order should be marked as shipped. This completes the process. 
 
 ## Collecting order payment
+An Order Payment tracks payments received for a given order. It is created during Order Completion Process, when
+the amount due becomes known. Its responsibility is to track when the requested amount was received in full.
+Once that happens, it announces that the order is fully paid, triggering the next step in the Order Completion Process.
 
 ## Shipping the package
+
+TODO

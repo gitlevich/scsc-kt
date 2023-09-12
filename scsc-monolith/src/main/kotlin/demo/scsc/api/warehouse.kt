@@ -36,5 +36,4 @@ object warehouse {
     enum class ShipmentImpossible {
         NOT_READY
     }
-
 }

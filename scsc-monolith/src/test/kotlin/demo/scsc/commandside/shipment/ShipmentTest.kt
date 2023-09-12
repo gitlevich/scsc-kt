@@ -1,4 +1,4 @@
-package demo.scsc.commandside.warehouse
+package demo.scsc.commandside.shipment
 
 import demo.scsc.Order.orderId
 import demo.scsc.Warehouse.addProductToPackageCommand

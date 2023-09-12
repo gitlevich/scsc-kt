@@ -7,7 +7,7 @@ import demo.scsc.api.order
 import demo.scsc.api.payment
 import demo.scsc.api.shoppingcart
 import demo.scsc.api.warehouse
-import demo.scsc.commandside.warehouse.Shipment
+import demo.scsc.commandside.shipment.Shipment
 import org.axonframework.eventhandling.DomainEventMessage
 import org.axonframework.eventhandling.GenericDomainEventMessage
 import org.axonframework.messaging.MetaData

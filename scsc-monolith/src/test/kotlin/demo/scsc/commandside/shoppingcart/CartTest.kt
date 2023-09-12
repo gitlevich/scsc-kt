@@ -23,20 +23,20 @@ import org.axonframework.test.aggregate.AggregateTestFixture
 import org.junit.jupiter.api.Test
 
 class CartTest {
-    private val cart = AggregateTestFixture(Cart::class.java).also {
+    private val cartAggregate = AggregateTestFixture(Cart::class.java).also {
         it.registerInjectableResource { cartId }
     }
 
     @Test
     fun `should publish CartCreatedEvent and ProductAddedToCartEvent on AddProductToCartCommand`() {
-        cart.givenNoPriorActivity()
+        cartAggregate.givenNoPriorActivity()
             .`when`(addProductToCartCommand)
             .expectEvents(cartCreatedEvent, productAddedToCartEvent)
     }
 
     @Test
     fun `should set cart state on AddProductToCartCommand`() {
-        cart.givenNoPriorActivity()
+        cartAggregate.givenNoPriorActivity()
             .`when`(addProductToCartCommand)
             .expectState { cart ->
                 assertThat(cart.id).isEqualTo(cartCreatedEvent.id)
@@ -48,21 +48,21 @@ class CartTest {
     @Test
     fun `should complain if AddProductToCartCommand attempts to add the product contained in cart`() {
         // TODO why? Can't I add several of them? Changed the set to list for now, then will start keeping track of quantity
-        cart.given(cartCreatedEvent, productAddedToCartEvent)
+        cartAggregate.given(cartCreatedEvent, productAddedToCartEvent)
             .`when`(addProductToCartCommand)
             .expectException(CommandExecutionException::class.java)
     }
 
     @Test
     fun `should schedule ABANDON_CART deadline on AddProductToCartCommand`() {
-        cart.givenNoPriorActivity()
+        cartAggregate.givenNoPriorActivity()
             .`when`(addProductToCartCommand)
             .expectScheduledDeadlineWithName(abandonCartAfter, ABANDON_CART)
     }
 
     @Test
     fun `should publish CartAbandonedEvent on ABANDON_CART deadline`() {
-        cart.givenCommands(addProductToCartCommand)
+        cartAggregate.givenCommands(addProductToCartCommand)
             .whenTimeElapses(abandonCartAfter)
             .expectTriggeredDeadlinesWithName(ABANDON_CART)
             .expectEvents(cartAbandonedEvent)
@@ -70,28 +70,28 @@ class CartTest {
 
     @Test
     fun `should complain on AddProductToCartCommand if the cart is already created - per creation policy`() {
-        cart.givenCommands(addProductToCartCommand)
+        cartAggregate.givenCommands(addProductToCartCommand)
             .`when`(addProductToCartCommand)
             .expectException(CommandExecutionException::class.java)
     }
 
     @Test
     fun `should publish ProductRemovedFromCartEvent on RemoveProductFromCartCommand when the product is in the cart`() {
-        cart.given(cartCreatedEvent, productAddedToCartEvent)
+        cartAggregate.given(cartCreatedEvent, productAddedToCartEvent)
             .`when`(removeProductFromCartCommand)
             .expectEvents(productRemovedFromCartEvent)
     }
 
     @Test
     fun `should complain on RemoveProductFromCartCommand when the product is NOT in the cart`() {
-        cart.given(cartCreatedEvent)
+        cartAggregate.given(cartCreatedEvent)
             .`when`(removeProductFromCartCommand)
             .expectException(CommandExecutionException::class.java)
     }
 
     @Test
     fun `should remove the product from the cart on ProductRemovedFromCartEvent`() {
-        cart.given(cartCreatedEvent, productAddedToCartEvent)
+        cartAggregate.given(cartCreatedEvent, productAddedToCartEvent)
             .`when`(removeProductFromCartCommand)
             .expectState { cart ->
                 assertThat(cart.products).doesNotContain(productAddedToCartEvent.productId)
@@ -100,21 +100,21 @@ class CartTest {
 
     @Test
     fun `on AbandonCartCommand, should publish CartAbandonedEvent`() {
-        cart.given(cartCreatedEvent, productAddedToCartEvent)
+        cartAggregate.given(cartCreatedEvent, productAddedToCartEvent)
             .`when`(abandonCartCommand)
             .expectEvents(cartAbandonedEvent.copy(reason = shoppingcart.CartAbandonedEvent.Reason.MANUAL))
     }
 
     @Test
     fun `should publish CartCheckoutRequestedEvent on CheckOutCartCommand`() {
-        cart.given(cartCreatedEvent, productAddedToCartEvent)
+        cartAggregate.given(cartCreatedEvent, productAddedToCartEvent)
             .`when`(checkOutCartCommand)
             .expectEvents(cartCheckoutRequestedEvent)
     }
 
     @Test
     fun `should publish CartCheckoutCompletedEvent on CompleteCartCheckoutCommand`() {
-        cart
+        cartAggregate
             .given(
                 cartCreatedEvent,
                 productAddedToCartEvent,
@@ -126,7 +126,7 @@ class CartTest {
 
     @Test
     fun `should publish CartCheckoutFailedEvent on HandleCartCheckoutFailureCommand`() {
-        cart
+        cartAggregate
             .given(
                 cartCreatedEvent,
                 productAddedToCartEvent,

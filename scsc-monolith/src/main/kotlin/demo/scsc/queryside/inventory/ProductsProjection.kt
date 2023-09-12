@@ -1,4 +1,4 @@
-package demo.scsc.queryside.productcatalog
+package demo.scsc.queryside.inventory
 
 import com.typesafe.config.Config
 import demo.scsc.Constants
@@ -17,17 +17,17 @@ import org.axonframework.queryhandling.QueryHandler
 class ProductsProjection(private val appConfig: Config) {
 
     @EventHandler
-    fun on(productUpdateReceivedEvent: ProductUpdateReceivedEvent) {
+    fun on(event: ProductUpdateReceivedEvent) {
         tx(appConfig) { em ->
-            if (productUpdateReceivedEvent.onSale) em.merge(productUpdateReceivedEvent.toEntity()) else
-                em.find(CatalogProduct::class.java, productUpdateReceivedEvent.id)?.let { em.remove(it) }
+            if (event.onSale) em.merge(event.toEntity()) else
+                em.find(InventoryProduct::class.java, event.id)?.let { em.remove(it) }
         }
     }
 
     @QueryHandler
     fun getProducts(query: ProductListQuery) = answer(query, appConfig) {
         ProductListQueryResponse(
-            it.createQuery(getProductsSql(query.sortBy), CatalogProduct::class.java)
+            it.createQuery(getProductsSql(query.sortBy), InventoryProduct::class.java)
                 .resultList
                 .asSequence()
                 .map { productEntity ->
@@ -45,10 +45,10 @@ class ProductsProjection(private val appConfig: Config) {
 
     @ResetHandler
     fun onReset(resetContext: ResetContext<*>?) {
-        tx(appConfig) { it.createQuery("DELETE FROM CatalogProduct").executeUpdate() }
+        tx(appConfig) { it.createQuery("DELETE FROM InventoryProduct").executeUpdate() }
     }
 
-    private fun ProductUpdateReceivedEvent.toEntity() = CatalogProduct(
+    private fun ProductUpdateReceivedEvent.toEntity() = InventoryProduct(
         id = id,
         name = name,
         desc = desc,
@@ -57,7 +57,7 @@ class ProductsProjection(private val appConfig: Config) {
     )
 
     companion object {
-        private const val GET_PRODUCTS_SQL = "SELECT p FROM CatalogProduct AS p"
+        private const val GET_PRODUCTS_SQL = "SELECT p FROM InventoryProduct AS p"
         private fun getProductsSql(sortBy: ProductListQuery.SortBy): String = "$GET_PRODUCTS_SQL ORDER BY ${sortBy.value}"
     }
 }

@@ -5,7 +5,7 @@ import demo.scsc.api.order.CompleteOrderCommand
 import demo.scsc.api.order.OrderCompletedEvent
 import demo.scsc.api.order.OrderCreatedEvent
 import demo.scsc.api.order.OrderCreatedEvent.OrderItem
-import demo.scsc.config.resolver.Validator
+import demo.scsc.config.resolver.Finder
 import org.axonframework.commandhandling.CommandHandler
 import org.axonframework.commandhandling.CommandMessage
 import org.axonframework.eventhandling.EventMessage
@@ -30,14 +30,14 @@ class Order() {
     @CommandHandler
     constructor(
         command: order.CreateOrderCommand,
-        validatorFor: Validator<UUID, ProductValidation.ProductValidationInfo?>
+        findProductDescriptionForOrderItem: Finder<UUID, ProductService.ProductDescription?>
     ) : this() {
         val orderItems = mutableListOf<OrderItem>()
         for (itemId in command.itemIds) {
-            val validator = validatorFor(itemId)
-                ?: throw IllegalStateException("No product validator available")
-            check(validator.forSale) { "Product ${validator.name} is no longer on sale" }
-            orderItems.add(OrderItem(itemId, validator.name, validator.price))
+            val productDescription = findProductDescriptionForOrderItem(itemId)
+                ?: throw IllegalStateException("No product matches orderItem $itemId")
+            check(productDescription.inStock) { "Product ${productDescription.name} is no longer in stock" }
+            orderItems.add(OrderItem(itemId, productDescription.name, productDescription.price))
         }
 
         applyEvent(OrderCreatedEvent(command.orderId, command.owner, orderItems))
