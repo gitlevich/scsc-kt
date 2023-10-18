@@ -24,26 +24,6 @@ import java.util.*
 @ProcessingGroup(Constants.PROCESSING_GROUP_ORDER)
 class OrdersProjection(private val appConfig: Config) {
 
-    @EventHandler
-    fun on(event: OrderCreatedEvent) {
-        tx(appConfig) { it.persist(event.toEntity()) }
-    }
-
-    @EventHandler
-    fun on(event: OrderFullyPaidEvent) {
-        updated(event.orderId) { it.copy(isPaid = true) }
-    }
-
-    @EventHandler
-    fun on(event: PackageReadyEvent) {
-        updated(event.orderId) { it.copy(isPrepared = true) }
-    }
-
-    @EventHandler
-    fun on(event: OrderCompletedEvent) {
-        updated(event.orderId) { it.copy(isReady = true) }
-    }
-
     @QueryHandler
     fun getOrders(query: GetOrdersQuery): GetOrdersQueryResponse = tx(appConfig) { entityManager ->
         val orders = entityManager
@@ -77,6 +57,26 @@ class OrdersProjection(private val appConfig: Config) {
             }
         )
     }
+    @EventHandler
+    fun on(event: OrderCreatedEvent) {
+        tx(appConfig) { it.persist(event.toEntity()) }
+    }
+
+    @EventHandler
+    fun on(event: OrderFullyPaidEvent) {
+        updated(event.orderId) { it.copy(isPaid = true) }
+    }
+
+    @EventHandler
+    fun on(event: PackageReadyEvent) {
+        updated(event.orderId) { it.copy(isPrepared = true) }
+    }
+
+    @EventHandler
+    fun on(event: OrderCompletedEvent) {
+        updated(event.orderId) { it.copy(isReady = true) }
+    }
+
 
     @ResetHandler
     fun onReset(resetContext: ResetContext<*>?) {

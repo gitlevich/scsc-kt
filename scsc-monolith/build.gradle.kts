@@ -43,19 +43,22 @@ val inspectorAxonVersion = "0.1.9"
 val typesafeConfigVersion = "1.4.2"
 val jacksonVersion = "2.15.1"
 val jacksonKotlinModuleVersion = "2.15.2"
+
 val jakartaPersistenceVersion = "3.1.0"
+val hibernateVersion = "6.2.2.Final"
 val postgresVersion = "42.6.0"
+
 val logbackVersion = "1.4.7"
 val microstreamVersion = "08.00.00-MS-GA"
-val angusMailVersion = "2.0.1"
 
+val angusMailVersion = "2.0.1"
 val mockkVersion = "1.13.5"
 val assertjVersion = "3.24.2"
 val dotEnvVersion = "6.4.1"
 val archunitVersion = "1.0.1"
 val jupiterVersion = "5.9.3"
-val h2Version = "2.2.220"
 
+val h2Version = "2.2.220"
 dependencies {
     // Dependency Management
     implementation(platform("com.fasterxml.jackson:jackson-bom:$jacksonVersion"))
@@ -76,7 +79,6 @@ dependencies {
 
     // JPA
     implementation("jakarta.persistence:jakarta.persistence-api:$jakartaPersistenceVersion")
-    val hibernateVersion = "6.2.2.Final"
     implementation("org.hibernate:hibernate-core:$hibernateVersion")
     implementation("org.postgresql:postgresql:$postgresVersion")
     implementation("org.jetbrains.kotlin.plugin.jpa:org.jetbrains.kotlin.plugin.jpa.gradle.plugin:$kotlinVersion")
